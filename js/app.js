@@ -200,43 +200,31 @@ async function addWeightEntry(competitor, date, weight) {
 // Function to load and display weight data
 async function loadWeightData() {
     try {
-        showMessage('Loading data...', 'info');
-        
-        const querySnapshot = await db.collection('weightEntries')
-            .orderBy('date', 'desc')
+        const snapshot = await db.collection('weights')
+            .orderBy('date', 'asc')
             .get();
         
-        // Clear and populate weightData array
-        weightData.length = 0;
-        
-        querySnapshot.forEach(doc => {
+        weightData = [];
+        snapshot.forEach(doc => {
             const data = doc.data();
             weightData.push({
                 id: doc.id,
                 name: data.name,
-                weight: data.weight,
-                date: data.date.toDate ? data.date.toDate() : new Date(data.date),
-                timestamp: data.timestamp
+                date: data.date.toDate(),
+                weight: data.weight
             });
         });
         
+        console.log(`✅ Loaded ${weightData.length} weight entries`);
+        
         // Store data globally for charts
+        window.PKWLC = window.PKWLC || {};
         window.PKWLC.weightData = weightData;
         window.PKWLC.competitors = competitors;
         
-        console.log('Loaded weight data:', weightData.length, 'entries');
-        
-        updateLeaderboard();
-        
-        // Render charts after data is loaded
-        if (window.PKWLC.renderChartsInternal) {
-            window.PKWLC.renderChartsInternal();
-        }
-        
-        hideMessage();
     } catch (error) {
-        console.error('Error loading weight data:', error);
-        showMessage('Error loading data: ' + error.message, 'error');
+        console.error('❌ Error loading weight data:', error);
+        throw error;
     }
 }
 
