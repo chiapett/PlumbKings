@@ -160,6 +160,7 @@ function setupFormHandler() {
             
             // Refresh data and displays
             await loadWeightData();
+            renderChallengeTimeline();
             renderLeaderboard();
             renderCharts();
             
