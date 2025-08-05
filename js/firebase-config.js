@@ -9,11 +9,12 @@ const firebaseConfig = {
 };
 
 // Check if we should use local database (for development)
+// Use Firebase if we have valid environment variables
 const useLocalDB = !window.ENV?.FIREBASE_API_KEY || 
                    window.ENV.FIREBASE_API_KEY === "your_api_key_here" ||
-                   window.location.hostname === 'localhost' ||
-                   window.location.hostname === '127.0.0.1' ||
-                   window.location.protocol === 'file:';
+                   (window.location.hostname === 'localhost' && !window.ENV?.FIREBASE_API_KEY) ||
+                   (window.location.hostname === '127.0.0.1' && !window.ENV?.FIREBASE_API_KEY) ||
+                   (window.location.protocol === 'file:' && !window.ENV?.FIREBASE_API_KEY);
 
 let db;
 
@@ -28,10 +29,21 @@ if (useLocalDB) {
     }
 } else {
     console.log('🔥 Using Firebase Firestore');
-    // Initialize Firebase
-    firebase.initializeApp(firebaseConfig);
-    // Initialize Firestore
-    db = firebase.firestore();
+    console.log('🔑 Firebase config loaded from environment variables');
+    try {
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        // Initialize Firestore
+        db = firebase.firestore();
+        console.log('✅ Firebase initialized successfully');
+    } catch (error) {
+        console.error('❌ Firebase initialization failed:', error);
+        console.log('⚠️ Falling back to local database...');
+        // Fallback to local database if Firebase fails
+        if (window.LocalFirestore) {
+            db = window.LocalFirestore.db;
+        }
+    }
 }
 
 // For GitHub Pages deployment with secrets, inject environment variables

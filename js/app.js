@@ -42,6 +42,9 @@ async function initializeApp() {
             throw new Error('Database not initialized');
         }
         
+        // Add database indicator to the page
+        addDatabaseIndicator();
+        
         // Set today's date as default
         dateInput.valueAsDate = new Date();
         
@@ -64,6 +67,26 @@ async function initializeApp() {
         console.error('❌ Error initializing app:', error);
         showMessage('Error initializing dashboard. Check console for details.', 'error');
     }
+}
+
+function addDatabaseIndicator() {
+    const header = document.querySelector('header');
+    const isFirebase = db.collection && typeof firebase !== 'undefined';
+    const indicator = document.createElement('div');
+    indicator.style.cssText = `
+        background: ${isFirebase ? '#d4edda' : '#fff3cd'};
+        color: ${isFirebase ? '#155724' : '#856404'};
+        padding: 10px;
+        margin: 10px 0;
+        border-radius: 5px;
+        border: 1px solid ${isFirebase ? '#c3e6cb' : '#ffeaa7'};
+        text-align: center;
+        font-weight: bold;
+    `;
+    indicator.innerHTML = isFirebase ? 
+        '🔥 Using Firebase Firestore Database' : 
+        '🗄️ Using Local Test Database';
+    header.appendChild(indicator);
 }
 
 function renderChallengeTimeline() {
@@ -179,18 +202,20 @@ async function addWeightEntry(competitor, date, weight) {
         };
 
         // Handle date and timestamp based on database type
-        if (db.collection) {
+        if (db.collection && typeof firebase !== 'undefined') {
             // Firebase Firestore
+            console.log('🔥 Adding to Firebase Firestore');
             entryData.date = firebase.firestore.Timestamp.fromDate(new Date(date));
             entryData.timestamp = firebase.firestore.FieldValue.serverTimestamp();
         } else {
             // Local database
+            console.log('🗄️ Adding to Local database');
             entryData.date = window.LocalFirestore.Timestamp.fromDate(new Date(date));
             entryData.timestamp = window.LocalFirestore.FieldValue.serverTimestamp();
         }
 
-        await db.collection('weights').add(entryData);
-        console.log('✅ Weight entry added successfully');
+        const docRef = await db.collection('weights').add(entryData);
+        console.log('✅ Weight entry added successfully, ID:', docRef.id || 'local');
     } catch (error) {
         console.error('❌ Error adding weight entry:', error);
         throw error;
