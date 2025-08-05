@@ -8,6 +8,15 @@ const firebaseConfig = {
     appId: window.ENV?.FIREBASE_APP_ID || "your_app_id_here"
 };
 
+// Debug logging for GitHub Pages
+console.log('🔍 Environment Debug Info:');
+console.log('- hostname:', window.location.hostname);
+console.log('- protocol:', window.location.protocol);
+console.log('- ENV object exists:', !!window.ENV);
+console.log('- ENV contents:', window.ENV);
+console.log('- Firebase API key available:', !!window.ENV?.FIREBASE_API_KEY);
+console.log('- Firebase config:', firebaseConfig);
+
 // Check if we should use local database (for development)
 // Use Firebase if we have valid environment variables
 const useLocalDB = !window.ENV?.FIREBASE_API_KEY || 
@@ -15,6 +24,8 @@ const useLocalDB = !window.ENV?.FIREBASE_API_KEY ||
                    (window.location.hostname === 'localhost' && !window.ENV?.FIREBASE_API_KEY) ||
                    (window.location.hostname === '127.0.0.1' && !window.ENV?.FIREBASE_API_KEY) ||
                    (window.location.protocol === 'file:' && !window.ENV?.FIREBASE_API_KEY);
+
+console.log('🗄️ useLocalDB decision:', useLocalDB);
 
 let db;
 
