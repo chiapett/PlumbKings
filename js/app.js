@@ -274,7 +274,12 @@ function renderLeaderboard() {
     const leaderboard = calculateLeaderboard();
     
     if (leaderboard.length === 0) {
-        leaderboardDiv.innerHTML = '<div class="loading">No weight entries yet. Add some data to see the leaderboard!</div>';
+        leaderboardDiv.innerHTML = `
+            <div class="loading">
+                <p>📊 No weight entries yet!</p>
+                <p>🎯 Start by adding weight data using the form above, or</p>
+                <p>🔧 Run <code>dbSample()</code> in the browser console to add sample data</p>
+            </div>`;
         return;
     }
     

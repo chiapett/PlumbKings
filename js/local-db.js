@@ -232,8 +232,22 @@ window.LocalFirestore = {
     Timestamp: LocalTimestamp
 };
 
-// Add some sample data if the database is empty
-if (Object.keys(localDB.collections).length === 0) {
+// Sample data generation (disabled by default)
+// To enable sample data, set generateSampleData to true
+const generateSampleData = false;
+
+// Force clear existing data (set to true to clear localStorage on next load)
+const forceClearData = false;
+
+if (forceClearData) {
+    console.log('🗑️ Force clearing existing local database...');
+    localStorage.removeItem('pkwlc_local_db');
+    console.log('✅ Local database cleared successfully');
+    // Reset forceClearData to false after clearing
+    // Note: You should manually set forceClearData back to false after first run
+}
+
+if (generateSampleData && Object.keys(localDB.collections).length === 0) {
     console.log('🗄️ Initializing local test database with sample data...');
     
     const competitors = ['Ben', 'Brien', 'Carl', 'Keith', 'Ryan', 'Stephen', 'Spencer', 'Tristan'];
@@ -273,4 +287,92 @@ if (Object.keys(localDB.collections).length === 0) {
     };
     
     addSampleData();
+} else if (!generateSampleData) {
+    console.log('🗄️ Local database initialized without sample data');
 }
+
+// Database utility functions for console use
+window.dbClear = function() {
+    localStorage.removeItem('pkwlc_local_db');
+    localDB.collections = {};
+    console.log('🗑️ Local database cleared successfully');
+    console.log('↻ Refresh the page to see changes');
+};
+
+window.dbStats = function() {
+    const weights = localDB.collections.weights || {};
+    const entries = Object.values(weights);
+    const competitors = [...new Set(entries.map(entry => entry.name))];
+    
+    console.log('📊 Database Statistics:');
+    console.log(`Collection: weights`);
+    console.log(`Total entries: ${entries.length}`);
+    console.log(`Competitors: ${competitors.length}`);
+    
+    if (entries.length > 0) {
+        const dates = entries.map(entry => new Date(entry.date._value)).sort();
+        console.log(`Date range: ${dates[0].toLocaleDateString()} - ${dates[dates.length-1].toLocaleDateString()}`);
+        console.log(`Competitors: ${competitors.join(', ')}`);
+    } else {
+        console.log('No entries found');
+    }
+};
+
+window.dbExport = function() {
+    const data = {
+        exported: new Date().toISOString(),
+        collections: localDB.collections
+    };
+    
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `pkwlc-database-${new Date().toISOString().split('T')[0]}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    
+    console.log('📁 Database exported to JSON file');
+};
+
+window.dbSample = async function() {
+    console.log('🗄️ Adding sample data...');
+    
+    const competitors = ['Ben', 'Brien', 'Carl', 'Keith', 'Ryan', 'Stephen', 'Spencer', 'Tristan'];
+    const sampleData = [];
+    
+    // Generate sample data for each competitor
+    competitors.forEach((competitor, index) => {
+        const baseWeight = 180 + (index * 10); // Varying starting weights
+        const startDate = new Date('2025-08-04'); // Challenge start date
+        
+        // Add entries for different dates
+        for (let week = 0; week < 4; week++) {
+            const entryDate = new Date(startDate);
+            entryDate.setDate(startDate.getDate() + (week * 7)); // Weekly entries
+            
+            // Simulate weight loss progress
+            const weightLoss = week * (0.5 + Math.random() * 1.5); // 0.5-2 lbs per week
+            const currentWeight = baseWeight - weightLoss;
+            
+            sampleData.push({
+                name: competitor,
+                date: LocalTimestamp.fromDate(entryDate),
+                weight: Math.round(currentWeight * 10) / 10 // Round to 1 decimal
+            });
+        }
+    });
+    
+    // Add sample data
+    for (const entry of sampleData) {
+        await localDB.collection('weights').add({
+            ...entry,
+            timestamp: LocalFieldValue.serverTimestamp()
+        });
+    }
+    
+    console.log(`✅ Added ${sampleData.length} sample weight entries for ${competitors.length} competitors`);
+    console.log('↻ Refresh the page to see changes');
+};
