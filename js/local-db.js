@@ -237,7 +237,7 @@ window.LocalFirestore = {
 const generateSampleData = false;
 
 // Force clear existing data (set to true to clear localStorage on next load)
-const forceClearData = false;
+const forceClearData = true;
 
 if (forceClearData) {
     console.log('🗑️ Force clearing existing local database...');
