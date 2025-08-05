@@ -92,13 +92,16 @@
 
     <!-- Conditionally load local environment config -->
     <script>
-        // Load local environment config if in development
+        // Load environment config
+        // For GitHub Pages: env-config.js is created during deployment
+        // For localhost: env-config.js may exist for testing
         if (window.location.hostname === 'localhost' || 
             window.location.hostname === '127.0.0.1' || 
             window.location.protocol === 'file:') {
-            document.write('<script src="js/env-config.js"><\/script>');
             document.write('<script src="js/db-utils.js"><\/script>');
         }
+        // Always try to load env-config.js (will exist on GitHub Pages)
+        document.write('<script src="js/env-config.js"><\/script>');
     </script>
     
     <script src="js/local-db.js"></script>
