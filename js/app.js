@@ -197,27 +197,46 @@ async function addWeightEntry(competitor, date, weight) {
     }
 }
 
+// Function to load and display weight data
 async function loadWeightData() {
     try {
-        const snapshot = await db.collection('weights')
-            .orderBy('date', 'asc')
+        showMessage('Loading data...', 'info');
+        
+        const querySnapshot = await db.collection('weightEntries')
+            .orderBy('date', 'desc')
             .get();
         
-        weightData = [];
-        snapshot.forEach(doc => {
+        // Clear and populate weightData array
+        weightData.length = 0;
+        
+        querySnapshot.forEach(doc => {
             const data = doc.data();
             weightData.push({
                 id: doc.id,
                 name: data.name,
-                date: data.date.toDate(),
-                weight: data.weight
+                weight: data.weight,
+                date: data.date.toDate ? data.date.toDate() : new Date(data.date),
+                timestamp: data.timestamp
             });
         });
         
-        console.log(`Loaded ${weightData.length} weight entries`);
+        // Store data globally for charts
+        window.PKWLC.weightData = weightData;
+        window.PKWLC.competitors = competitors;
+        
+        console.log('Loaded weight data:', weightData.length, 'entries');
+        
+        updateLeaderboard();
+        
+        // Render charts after data is loaded
+        if (window.PKWLC.renderChartsInternal) {
+            window.PKWLC.renderChartsInternal();
+        }
+        
+        hideMessage();
     } catch (error) {
         console.error('Error loading weight data:', error);
-        throw error;
+        showMessage('Error loading data: ' + error.message, 'error');
     }
 }
 
@@ -313,6 +332,25 @@ function formatDate(date) {
         day: 'numeric'
     });
 }
+
+// Debug function to check data
+window.debugChartData = function() {
+    console.log('=== PKWLC Debug Info ===');
+    console.log('Weight Data:', window.PKWLC?.weightData);
+    console.log('Competitors:', window.PKWLC?.competitors);
+    console.log('Weight Chart:', window.weightChart);
+    console.log('Percentage Chart:', window.percentageChart);
+    console.log('Charts loaded?', !!window.Chart);
+    
+    // Try to manually render charts
+    if (window.PKWLC?.renderChartsInternal) {
+        console.log('Manually rendering charts...');
+        window.PKWLC.renderChartsInternal();
+    }
+};
+
+// Add to global PKWLC object
+window.PKWLC.debugChartData = window.debugChartData;
 
 // Export functions for use in other modules
 window.PKWLC = {
