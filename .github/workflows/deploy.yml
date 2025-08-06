@@ -1,10 +1,10 @@
-name: Deploy PKWLC Dashboard to GitHub Pages
+name: Deploy PKWLC Dashboard with Firebase Config to GitHub Pages
 
 on:
   push:
     branches: [ main ]
-  pull_request:
-    branches: [ main ]
+  # Remove pull_request trigger to avoid duplicate runs
+  workflow_dispatch: # Allow manual triggering
 
 permissions:
   contents: read
