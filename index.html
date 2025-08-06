@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PKWLC - PlumbKings Weight Loss Competition</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🏆 PKWLC Dashboard</h1>
+            <p>PlumbKings Weight Loss Competition</p>
+            <div class="challenge-info">
+                <p><strong>📅 Challenge Duration:</strong> August 4, 2025 - November 4, 2025 (3 months)</p>
+                <p><strong>🎯 Monthly Milestones:</strong> Track progress every month!</p>
+                <p><strong>🔥 Firebase Integration:</strong> Ready for cloud data storage!</p>
+            </div>
+        </header>
+
+        <main>
+            <!-- Challenge Progress Section -->
+            <section class="challenge-progress">
+                <h2>🎯 Challenge Progress</h2>
+                <div id="challengeTimeline">
+                    <div class="loading">Loading challenge timeline...</div>
+                </div>
+            </section>
+            <!-- Data Entry Section -->
+            <section class="data-entry">
+                <h2>📊 Record Weight</h2>
+                <form id="weightForm">
+                    <div class="form-group">
+                        <label for="competitor">Competitor:</label>
+                        <select id="competitor" required>
+                            <option value="">Select competitor...</option>
+                            <!-- Options will be populated dynamically -->
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="date">Date:</label>
+                        <input type="date" id="date" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="weight">Weight (lbs):</label>
+                        <input type="number" id="weight" step="0.1" min="50" max="500" required>
+                    </div>
+                    <button type="submit">Add Weight Entry</button>
+                </form>
+            </section>
+
+            <!-- Leaderboard Section -->
+            <section class="leaderboard">
+                <h2>🥇 Leaderboard</h2>
+                <div id="leaderboardTable">
+                    <div class="loading">Loading leaderboard...</div>
+                </div>
+            </section>
+
+            <!-- Charts Section -->
+            <section class="charts">
+                <h2>📈 Progress Charts</h2>
+                
+                <div class="chart-container">
+                    <h3>Weight Progress Over Time</h3>
+                    <div class="chart-wrapper">
+                        <canvas id="weightChart"></canvas>
+                        <div class="chart-loading" id="weightChartLoading">Loading chart...</div>
+                    </div>
+                </div>
+
+                <div class="chart-container">
+                    <h3>Weight Loss Percentage Over Time</h3>
+                    <div class="chart-wrapper">
+                        <canvas id="percentageChart"></canvas>
+                        <div class="chart-loading" id="percentageChartLoading">Loading chart...</div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <footer>
+            <p>&copy; 2025 PlumbKings Weight Loss Competition</p>
+        </footer>
+    </div>
+
+    <!-- Success/Error Messages -->
+    <div id="message" class="message hidden"></div>
+
+    <!-- Conditionally load local environment config -->
+    <script>
+        // Load environment config
+        // For GitHub Pages: env-config.js is created during deployment with repository variables
+        // For localhost: env-config.js may exist for testing
+        if (window.location.hostname === 'localhost' || 
+            window.location.hostname === '127.0.0.1' || 
+            window.location.protocol === 'file:') {
+            document.write('<script src="js/db-utils.js"><\/script>');
+        }
+        // Always try to load env-config.js (will exist on GitHub Pages)
+        document.write('<script src="js/env-config.js"><\/script>');
+    </script>
+    
+    <script src="js/local-db.js"></script>
+    <script src="js/firebase-config.js"></script>
+    <script src="js/app.js"></script>
+    <script src="js/charts.js"></script>
+</body>
+</html>
