@@ -1,4 +1,4 @@
-name: Deploy PKWLC Dashboard to GitHub Pages
+name: Deploy to GitHub Pages
 
 on:
   push:
@@ -6,67 +6,46 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
   pages: write
   id-token: write
 
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
 jobs:
-  build-and-deploy:
-    runs-on: ubuntu-latest
+  deploy:
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
     
     steps:
-    - name: Checkout
-      uses: actions/checkout@v4
-      
-    - name: Create Firebase config with repository variables
-      run: |
-        # Create the env-config.js file with actual values
-        cat > js/env-config.js << 'EOF'
-        // Firebase configuration from GitHub repository variables
-        window.ENV = {
-          FIREBASE_API_KEY: "${{ vars.FIREBASE_API_KEY }}",
-          FIREBASE_AUTH_DOMAIN: "${{ vars.FIREBASE_AUTH_DOMAIN }}",
-          FIREBASE_PROJECT_ID: "${{ vars.FIREBASE_PROJECT_ID }}",
-          FIREBASE_STORAGE_BUCKET: "${{ vars.FIREBASE_STORAGE_BUCKET }}",
-          FIREBASE_MESSAGING_SENDER_ID: "${{ vars.FIREBASE_MESSAGING_SENDER_ID }}",
-          FIREBASE_APP_ID: "${{ vars.FIREBASE_APP_ID }}"
-        };
-        console.log('🔧 Environment config loaded:', window.ENV);
-        EOF
+      - name: Checkout
+        uses: actions/checkout@v4
         
-        # Verify the file was created correctly
-        echo "✅ Created js/env-config.js with Firebase configuration"
-        echo "📁 Contents:"
-        cat js/env-config.js
+      - name: Inject Firebase Configuration
+        run: |
+          # Replace placeholder values in firebase-config.js with actual repository variables
+          sed -i 's/your_api_key_here/${{ vars.FIREBASE_API_KEY }}/g' js/firebase-config.js
+          sed -i 's/your_auth_domain_here/${{ vars.FIREBASE_AUTH_DOMAIN }}/g' js/firebase-config.js
+          sed -i 's/your_project_id_here/${{ vars.FIREBASE_PROJECT_ID }}/g' js/firebase-config.js
+          sed -i 's/your_storage_bucket_here/${{ vars.FIREBASE_STORAGE_BUCKET }}/g' js/firebase-config.js
+          sed -i 's/your_sender_id_here/${{ vars.FIREBASE_MESSAGING_SENDER_ID }}/g' js/firebase-config.js
+          sed -i 's/your_app_id_here/${{ vars.FIREBASE_APP_ID }}/g' js/firebase-config.js
+          
+          echo "✅ Firebase configuration updated:"
+          grep -A 10 "const firebaseConfig" js/firebase-config.js
         
-    - name: Setup Pages
-      uses: actions/configure-pages@v5
-      
-    - name: Build site
-      run: |
-        # Create _site directory for GitHub Pages
-        mkdir -p _site
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
         
-        # Copy all files to _site directory
-        cp -r css _site/
-        cp -r js _site/
-        cp -r images _site/ 2>/dev/null || true
-        cp index.html _site/
-        cp *.md _site/ 2>/dev/null || true
-        cp *.json _site/ 2>/dev/null || true
-        
-        # Verify env-config.js is in the build
-        echo "🔍 Verifying env-config.js in build:"
-        ls -la _site/js/env-config.js
-        
-    - name: Upload Pages artifact
-      uses: actions/upload-pages-artifact@v3
-      with:
-        path: _site
-        
-    - name: Deploy to GitHub Pages
-      id: deployment
-      uses: actions/deploy-pages@v4
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: '.'
+          
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
