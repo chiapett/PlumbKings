@@ -27,48 +27,26 @@ jobs:
         
       - name: Inject Firebase Configuration
         run: |
-          # Create a temporary script to replace Firebase config values
-          cat > replace_config.js << 'SCRIPT'
-          const fs = require('fs');
+          # Create the env-config.js file that the HTML is trying to load
+          cat > js/env-config.js << EOF
+          // Environment configuration injected during GitHub Actions build
+          window.ENV = {
+            FIREBASE_API_KEY: "${{ vars.FIREBASE_API_KEY }}",
+            FIREBASE_AUTH_DOMAIN: "${{ vars.FIREBASE_AUTH_DOMAIN }}",
+            FIREBASE_PROJECT_ID: "${{ vars.FIREBASE_PROJECT_ID }}",
+            FIREBASE_STORAGE_BUCKET: "${{ vars.FIREBASE_STORAGE_BUCKET }}",
+            FIREBASE_MESSAGING_SENDER_ID: "${{ vars.FIREBASE_MESSAGING_SENDER_ID }}",
+            FIREBASE_APP_ID: "${{ vars.FIREBASE_APP_ID }}"
+          };
+          console.log('🔧 Environment config loaded:', window.ENV);
+          EOF
           
-          // Read the firebase-config.js file
-          let content = fs.readFileSync('js/firebase-config.js', 'utf8');
+          # Verify the file was created
+          echo "✅ Created js/env-config.js:"
+          cat js/env-config.js
           
-          // Replace the actual placeholder values with environment variables
-          content = content.replace('"your_api_key_here"', `"${process.env.FIREBASE_API_KEY}"`);
-          content = content.replace('"your_auth_domain_here"', `"${process.env.FIREBASE_AUTH_DOMAIN}"`);
-          content = content.replace('"your_project_id_here"', `"${process.env.FIREBASE_PROJECT_ID}"`);
-          content = content.replace('"your_storage_bucket_here"', `"${process.env.FIREBASE_STORAGE_BUCKET}"`);
-          content = content.replace('"your_sender_id_here"', `"${process.env.FIREBASE_MESSAGING_SENDER_ID}"`);
-          content = content.replace('"your_app_id_here"', `"${process.env.FIREBASE_APP_ID}"`);
-          
-          // Write the updated content back
-          fs.writeFileSync('js/firebase-config.js', content);
-          
-          console.log('✅ Firebase configuration updated successfully');
-          SCRIPT
-          
-          # Set environment variables from repository variables (strip newlines)
-          export FIREBASE_API_KEY=$(echo "${{ vars.FIREBASE_API_KEY }}" | tr -d '\n')
-          export FIREBASE_AUTH_DOMAIN=$(echo "${{ vars.FIREBASE_AUTH_DOMAIN }}" | tr -d '\n')
-          export FIREBASE_PROJECT_ID=$(echo "${{ vars.FIREBASE_PROJECT_ID }}" | tr -d '\n')
-          export FIREBASE_STORAGE_BUCKET=$(echo "${{ vars.FIREBASE_STORAGE_BUCKET }}" | tr -d '\n')
-          export FIREBASE_MESSAGING_SENDER_ID=$(echo "${{ vars.FIREBASE_MESSAGING_SENDER_ID }}" | tr -d '\n')
-          export FIREBASE_APP_ID=$(echo "${{ vars.FIREBASE_APP_ID }}" | tr -d '\n')
-          
-          # Debug: Show what values we're using
-          echo "🔍 Repository variables:"
-          echo "FIREBASE_API_KEY: $FIREBASE_API_KEY"
-          echo "FIREBASE_PROJECT_ID: $FIREBASE_PROJECT_ID"
-          
-          # Run the replacement script
-          node replace_config.js
-          
-          # Clean up the temporary script
-          rm replace_config.js
-          
-          echo "✅ Firebase configuration updated:"
-          grep -A 10 "const firebaseConfig" js/firebase-config.js
+          # Check file size and permissions
+          ls -la js/env-config.js
         
       - name: Setup Pages
         uses: actions/configure-pages@v5
