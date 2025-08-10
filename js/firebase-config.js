@@ -1,31 +1,28 @@
-// Firebase configuration
+// Firebase configuration - hardcoded for reliability
 const firebaseConfig = {
-    apiKey: window.ENV?.FIREBASE_API_KEY || "your_api_key_here",
-    authDomain: window.ENV?.FIREBASE_AUTH_DOMAIN || "your_auth_domain_here",
-    projectId: window.ENV?.FIREBASE_PROJECT_ID || "your_project_id_here",
-    storageBucket: window.ENV?.FIREBASE_STORAGE_BUCKET || "your_storage_bucket_here",
-    messagingSenderId: window.ENV?.FIREBASE_MESSAGING_SENDER_ID || "your_sender_id_here",
-    appId: window.ENV?.FIREBASE_APP_ID || "your_app_id_here"
+    apiKey: "AIzaSyAAaz1E3eCJ6x4Q1RgTQi5A3PFEZVA--Mk",
+    authDomain: "plumb-king-dashboard.firebaseapp.com",
+    projectId: "plumb-king-dashboard",
+    storageBucket: "plumb-king-dashboard.firebasestorage.app",
+    messagingSenderId: "926852362871",
+    appId: "1:926852362871:web:ff3f12c4c40796a561cc72"
 };
 
-// Debug logging for GitHub Pages
+// Debug logging
 console.log('🔍 Environment Debug Info:');
 console.log('- hostname:', window.location.hostname);
 console.log('- protocol:', window.location.protocol);
-console.log('- ENV object exists:', !!window.ENV);
-console.log('- ENV contents:', window.ENV);
-console.log('- Firebase API key available:', !!window.ENV?.FIREBASE_API_KEY);
 console.log('- Firebase config:', firebaseConfig);
 
-// Check if we should use local database (for development)
-// Use Firebase if we have valid environment variables
-const useLocalDB = !window.ENV?.FIREBASE_API_KEY || 
-                   window.ENV.FIREBASE_API_KEY === "your_api_key_here" ||
-                   (window.location.hostname === 'localhost' && !window.ENV?.FIREBASE_API_KEY) ||
-                   (window.location.hostname === '127.0.0.1' && !window.ENV?.FIREBASE_API_KEY) ||
-                   (window.location.protocol === 'file:' && !window.ENV?.FIREBASE_API_KEY);
+// Always use Firebase since we have hardcoded configuration
+// Only use local DB if explicitly requested via URL parameter
+const urlParams = new URLSearchParams(window.location.search);
+const forceLocal = urlParams.get('useLocal') === 'true';
+
+const useLocalDB = forceLocal;
 
 console.log('🗄️ useLocalDB decision:', useLocalDB);
+console.log('🔧 Force local mode:', forceLocal);
 
 let db;
 
@@ -40,7 +37,7 @@ if (useLocalDB) {
     }
 } else {
     console.log('🔥 Using Firebase Firestore');
-    console.log('🔑 Firebase config loaded from environment variables');
+    console.log('🔑 Firebase config loaded with hardcoded values');
     try {
         // Initialize Firebase
         firebase.initializeApp(firebaseConfig);
@@ -55,17 +52,4 @@ if (useLocalDB) {
             db = window.LocalFirestore.db;
         }
     }
-}
-
-// For GitHub Pages deployment with secrets, inject environment variables
-if (typeof process !== 'undefined' && process.env) {
-    // This will be replaced during build process
-    window.ENV = {
-        FIREBASE_API_KEY: process.env.FIREBASE_API_KEY,
-        FIREBASE_AUTH_DOMAIN: process.env.FIREBASE_AUTH_DOMAIN,
-        FIREBASE_PROJECT_ID: process.env.FIREBASE_PROJECT_ID,
-        FIREBASE_STORAGE_BUCKET: process.env.FIREBASE_STORAGE_BUCKET,
-        FIREBASE_MESSAGING_SENDER_ID: process.env.FIREBASE_MESSAGING_SENDER_ID,
-        FIREBASE_APP_ID: process.env.FIREBASE_APP_ID
-    };
 }
