@@ -375,39 +375,46 @@ window.PKWLC.debugChartData = window.debugChartData;
 // Modal functions for weight submission
 function showWeightModal(competitor, date, weight) {
     const modal = document.getElementById('weightModal');
-    const modalCompetitor = document.getElementById('modalCompetitor');
-    const modalDate = document.getElementById('modalDate');
-    const modalWeight = document.getElementById('modalWeight');
+    const brutalMessage = document.getElementById('brutalMessage');
     
-    // Format date for display
-    const formattedDate = new Date(date).toLocaleDateString('en-US', {
-        weekday: 'long',
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric'
-    });
+    // Get a brutal message from Amanda
+    const message = getBrutalAmandaMessage(competitor, weight);
     
-    // Analyze weight progress for personalized messaging
-    const progressAnalysis = analyzeWeightProgress(competitor, weight);
-    
-    // Update modal content based on progress
-    updateModalContent(progressAnalysis, competitor, formattedDate, weight);
+    // Update modal with the brutal message
+    brutalMessage.textContent = message;
     
     // Show modal
     modal.classList.remove('hidden');
     
-    // Add sound effect text for extra fun
-    showSoundEffect(progressAnalysis.type);
-    
     // Add event listeners for modal interactions
     setupModalEventListeners();
+}
+
+function getBrutalAmandaMessage(competitor, weight) {
+    const brutalMessages = [
+        "Listen up, chunky monkey! Time to face the music and the scale! 🐒⚖️",
+        "Well, well, well... look who finally decided to weigh themselves! 🙄",
+        "Oh honey, I see you've been making friends with the fridge again! 🥰❄️",
+        "Bless your heart! At least you tried... sort of! 💅✨",
+        "Sweetie, the only thing you should be gaining is my respect! 😤👑",
+        "Did someone say they were on a 'see-food' diet? I see food, I eat it? 👀🍕",
+        "Girl, your scale is crying more than I am right now! 😭⚖️",
+        "I'm not saying you're failing, but... actually, yes I am! 💁‍♀️",
+        "The audacity of some people! Step on that scale like you mean it! 😠👠",
+        "Oink oink, bitch! Time for some tough love! 🐷💕",
+        "At least your mom will still love you... probably! 🤱💗",
+        "You're lucky I care enough to roast you this hard! 🔥😘",
+        "Some people collect stamps, you collect pounds! How unique! 📬⚖️",
+        "I've seen glaciers move faster than your progress! 🧊🐌",
+        "Did you mistake the gym for a buffet again? Easy mistake! 🏋️‍♂️🍽️",
+        "Your dedication to mediocrity is truly inspiring! 👏✨",
+        "I'm not angry, I'm just extremely disappointed! 😤💔",
+        "The scale doesn't lie, unlike your food diary! 📖🤥",
+        "Maybe try chewing your food instead of inhaling it! 🌪️🍔",
+        "Your relationship with donuts is stronger than most marriages! 🍩💍"
+    ];
     
-    // Auto-close after 10 seconds
-    setTimeout(() => {
-        if (!modal.classList.contains('hidden')) {
-            closeWeightModal();
-        }
-    }, 10000);
+    return brutalMessages[Math.floor(Math.random() * brutalMessages.length)];
 }
 
 function analyzeWeightProgress(competitor, currentWeight) {
@@ -653,30 +660,16 @@ function closeWeightModal() {
 }
 
 function setupModalEventListeners() {
-    // ESC key to close modal
-    document.addEventListener('keydown', handleModalKeydown);
-    
-    // Click outside modal to close
-    document.getElementById('weightModal').addEventListener('click', handleModalBackdropClick);
+    // Modal can only be closed with X button - no other methods
+    // Removed ESC key and click-outside functionality to force X button usage
 }
 
 function removeModalEventListeners() {
-    document.removeEventListener('keydown', handleModalKeydown);
-    document.getElementById('weightModal').removeEventListener('click', handleModalBackdropClick);
+    // No event listeners to remove since modal only closes via X button
 }
 
-function handleModalKeydown(e) {
-    if (e.key === 'Escape') {
-        closeWeightModal();
-    }
-}
-
-function handleModalBackdropClick(e) {
-    const modalContent = document.querySelector('.modal-content');
-    if (!modalContent.contains(e.target)) {
-        closeWeightModal();
-    }
-}
+// Removed handleModalKeydown and handleModalBackdropClick functions
+// Modal now only closes via X button click
 
 function showSoundEffect(type) {
     const soundEffects = {

@@ -234,7 +234,7 @@ window.LocalFirestore = {
 
 // Sample data generation (disabled by default)
 // To enable sample data, set generateSampleData to true
-const generateSampleData = false;
+const generateSampleData = true;
 
 // Force clear existing data (set to true to clear localStorage on next load)
 const forceClearData = false;
