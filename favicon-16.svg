@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16">
+  <!-- Simplified donut for small size -->
+  <circle cx="8" cy="8" r="7" fill="#D2691E"/>
+  <circle cx="8" cy="8" r="7" fill="#FFB6C1" opacity="0.8"/>
+  <circle cx="8" cy="8" r="3" fill="white"/>
+  
+  <!-- Simple sprinkles -->
+  <rect x="6" y="4" width="1" height="2" fill="#FF0000"/>
+  <rect x="10" y="5" width="1" height="2" fill="#00FF00"/>
+  <rect x="7" y="11" width="1" height="2" fill="#0000FF"/>
+  <rect x="11" y="10" width="1" height="2" fill="#FFFF00"/>
+</svg>
