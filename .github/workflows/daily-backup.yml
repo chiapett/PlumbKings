@@ -1,0 +1,270 @@
+name: Daily Firebase Data Backup
+
+on:
+  schedule:
+    # Run daily at 6 AM UTC (adjust timezone as needed)
+    - cron: '0 6 * * *'
+  workflow_dispatch: # Allow manual triggering
+
+jobs:
+  backup-firebase-data:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+          
+      - name: Install dependencies
+        run: |
+          pip install requests python-dotenv
+          
+      - name: Create backup script
+        run: |
+          cat > backup_firebase.py << 'EOF'
+          #!/usr/bin/env python3
+          
+          import requests
+          import json
+          import sys
+          from datetime import datetime, timezone
+          
+          # Firebase configuration (hardcoded for reliability)
+          project_id = "plumb-king-dashboard"
+          api_key = "AIzaSyAAaz1E3eCJ6x4Q1RgTQi5A3PFEZVA--Mk"
+          
+          class FirebaseBackup:
+              def __init__(self):
+                  self.project_id = project_id
+                  self.api_key = api_key
+                  self.base_url = f'https://firestore.googleapis.com/v1/projects/{project_id}/databases/(default)/documents'
+                  self.backup_data = {}
+                  
+              def parse_firestore_fields(self, fields):
+                  """Parse Firestore field types to Python values"""
+                  parsed = {}
+                  
+                  for key, value in fields.items():
+                      if 'stringValue' in value:
+                          parsed[key] = value['stringValue']
+                      elif 'integerValue' in value:
+                          parsed[key] = int(value['integerValue'])
+                      elif 'doubleValue' in value:
+                          parsed[key] = float(value['doubleValue'])
+                      elif 'booleanValue' in value:
+                          parsed[key] = value['booleanValue']
+                      elif 'timestampValue' in value:
+                          parsed[key] = value['timestampValue']
+                      elif 'nullValue' in value:
+                          parsed[key] = None
+                      elif 'arrayValue' in value:
+                          parsed[key] = [self.parse_firestore_fields({'item': item})['item'] 
+                                        for item in value['arrayValue'].get('values', [])]
+                      elif 'mapValue' in value:
+                          parsed[key] = self.parse_firestore_fields(value['mapValue'].get('fields', {}))
+                      else:
+                          parsed[key] = str(value)
+                  
+                  return parsed
+          
+              def query_collection(self, collection_name):
+                  """Query a specific collection"""
+                  try:
+                      url = f"{self.base_url}/{collection_name}"
+                      params = {'key': self.api_key}
+                      
+                      response = requests.get(url, params=params)
+                      
+                      if response.status_code == 200:
+                          data = response.json()
+                          documents = data.get('documents', [])
+                          
+                          parsed_docs = []
+                          for doc in documents:
+                              doc_id = doc['name'].split('/')[-1]
+                              fields = doc.get('fields', {})
+                              
+                              parsed_fields = self.parse_firestore_fields(fields)
+                              parsed_fields['_id'] = doc_id
+                              parsed_fields['_collection'] = collection_name
+                              parsed_docs.append(parsed_fields)
+                          
+                          return parsed_docs
+                          
+                      elif response.status_code == 404:
+                          return []
+                      else:
+                          print(f"❌ Error querying {collection_name}: {response.status_code}")
+                          return []
+                          
+                  except Exception as e:
+                      print(f"❌ Exception querying {collection_name}: {str(e)}")
+                      return []
+          
+              def backup_all_data(self):
+                  """Backup all data from Firebase"""
+                  backup_timestamp = datetime.now(timezone.utc).isoformat()
+                  
+                  print("🔥 PlumbKings Firebase Data Backup")
+                  print("=" * 60)
+                  print(f"📅 Backup Date: {backup_timestamp}")
+                  print(f"🏗️  Project: {self.project_id}")
+                  print("=" * 60)
+                  
+                  # Collections to backup
+                  collections = ['weights', 'weightEntries', 'competitors', 'settings', 'users', 'entries']
+                  
+                  total_documents = 0
+                  
+                  for collection in collections:
+                      print(f"\n📂 Backing up collection: {collection}")
+                      docs = self.query_collection(collection)
+                      
+                      if docs:
+                          print(f"   📄 Found {len(docs)} documents")
+                          self.backup_data[collection] = docs
+                          total_documents += len(docs)
+                          
+                          # Show sample data for weight-related collections
+                          if collection in ['weights', 'weightEntries'] and docs:
+                              print(f"   📋 Sample entries:")
+                              for i, doc in enumerate(docs[:3]):
+                                  name = doc.get('name', doc.get('competitor', 'Unknown'))
+                                  weight = doc.get('weight', 'N/A')
+                                  date = doc.get('date', 'N/A')
+                                  print(f"      {i+1}. {name}: {weight} lbs on {date}")
+                              
+                              if len(docs) > 3:
+                                  print(f"      ... and {len(docs) - 3} more entries")
+                      else:
+                          print(f"   📭 Empty collection")
+                          self.backup_data[collection] = []
+                  
+                  # Summary
+                  print(f"\n📊 BACKUP SUMMARY")
+                  print("=" * 60)
+                  print(f"📅 Timestamp: {backup_timestamp}")
+                  print(f"📚 Collections: {len(collections)}")
+                  print(f"📄 Total Documents: {total_documents}")
+                  
+                  collections_with_data = [k for k, v in self.backup_data.items() if v]
+                  if collections_with_data:
+                      print(f"📂 Collections with data:")
+                      for collection in collections_with_data:
+                          print(f"   - {collection}: {len(self.backup_data[collection])} documents")
+                  else:
+                      print("📭 No data found in any collection")
+                  
+                  # Weight Loss Analysis
+                  if self.backup_data.get('weights'):
+                      self.analyze_weight_data()
+                  
+                  # Complete backup data
+                  backup_package = {
+                      'backup_info': {
+                          'timestamp': backup_timestamp,
+                          'project_id': self.project_id,
+                          'total_documents': total_documents,
+                          'collections_count': len(collections)
+                      },
+                      'data': self.backup_data
+                  }
+                  
+                  print(f"\n💾 COMPLETE BACKUP DATA")
+                  print("=" * 60)
+                  print(json.dumps(backup_package, indent=2, default=str))
+                  
+                  return backup_package
+              
+              def analyze_weight_data(self):
+                  """Analyze weight loss progress"""
+                  weights = self.backup_data.get('weights', [])
+                  if not weights:
+                      return
+                  
+                  print(f"\n📈 WEIGHT LOSS ANALYSIS")
+                  print("=" * 60)
+                  
+                  # Group by competitor
+                  competitors = {}
+                  for entry in weights:
+                      name = entry.get('name', entry.get('competitor', 'Unknown'))
+                      if name not in competitors:
+                          competitors[name] = []
+                      competitors[name].append(entry)
+                  
+                  # Sort each competitor's entries by date
+                  for name in competitors:
+                      competitors[name].sort(key=lambda x: x.get('date', ''))
+                  
+                  # Calculate progress for each competitor
+                  leaderboard = []
+                  for name, entries in competitors.items():
+                      if len(entries) >= 2:
+                          start_weight = entries[0].get('weight', 0)
+                          current_weight = entries[-1].get('weight', 0)
+                          weight_loss = start_weight - current_weight
+                          percentage_loss = (weight_loss / start_weight * 100) if start_weight > 0 else 0
+                          
+                          leaderboard.append({
+                              'name': name,
+                              'start_weight': start_weight,
+                              'current_weight': current_weight,
+                              'weight_loss': weight_loss,
+                              'percentage_loss': percentage_loss,
+                              'entries_count': len(entries)
+                          })
+                      else:
+                          leaderboard.append({
+                              'name': name,
+                              'start_weight': entries[0].get('weight', 0),
+                              'current_weight': entries[0].get('weight', 0),
+                              'weight_loss': 0,
+                              'percentage_loss': 0,
+                              'entries_count': len(entries)
+                          })
+                  
+                  # Sort by weight loss percentage
+                  leaderboard.sort(key=lambda x: x['percentage_loss'], reverse=True)
+                  
+                  print(f"🏆 CURRENT LEADERBOARD")
+                  print("-" * 40)
+                  for i, competitor in enumerate(leaderboard, 1):
+                      print(f"{i}. {competitor['name']}")
+                      print(f"   Start: {competitor['start_weight']} lbs")
+                      print(f"   Current: {competitor['current_weight']} lbs")
+                      print(f"   Lost: {competitor['weight_loss']:.1f} lbs ({competitor['percentage_loss']:.1f}%)")
+                      print(f"   Entries: {competitor['entries_count']}")
+                      print()
+          
+          if __name__ == "__main__":
+              backup = FirebaseBackup()
+              try:
+                  backup.backup_all_data()
+                  print("\n✅ Backup completed successfully!")
+              except Exception as e:
+                  print(f"\n❌ Backup failed: {str(e)}")
+                  sys.exit(1)
+          EOF
+          
+      - name: Run Firebase Backup
+        run: python backup_firebase.py
+        
+      - name: Save backup metadata
+        run: |
+          echo "Backup completed at $(date)" >> backup_log.txt
+          echo "GitHub Actions Run: ${{ github.run_number }}" >> backup_log.txt
+          echo "Repository: ${{ github.repository }}" >> backup_log.txt
+          echo "Branch: ${{ github.ref_name }}" >> backup_log.txt
+          echo "---" >> backup_log.txt
+          
+      - name: Upload backup log as artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: firebase-backup-${{ github.run_number }}
+          path: backup_log.txt
+          retention-days: 90

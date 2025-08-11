@@ -1,0 +1,127 @@
+name: Manual Firebase Backup
+
+on:
+  workflow_dispatch:
+    inputs:
+      backup_reason:
+        description: 'Reason for manual backup'
+        required: false
+        default: 'Manual backup requested'
+
+jobs:
+  manual-backup:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+          
+      - name: Install dependencies
+        run: |
+          pip install requests
+          
+      - name: Run Manual Firebase Backup
+        run: |
+          python3 << 'EOF'
+          import requests
+          import json
+          from datetime import datetime, timezone
+          
+          # Firebase configuration
+          project_id = "plumb-king-dashboard"
+          api_key = "AIzaSyAAaz1E3eCJ6x4Q1RgTQi5A3PFEZVA--Mk"
+          base_url = f'https://firestore.googleapis.com/v1/projects/{project_id}/databases/(default)/documents'
+          
+          def parse_firestore_fields(fields):
+              parsed = {}
+              for key, value in fields.items():
+                  if 'stringValue' in value:
+                      parsed[key] = value['stringValue']
+                  elif 'integerValue' in value:
+                      parsed[key] = int(value['integerValue'])
+                  elif 'doubleValue' in value:
+                      parsed[key] = float(value['doubleValue'])
+                  elif 'timestampValue' in value:
+                      parsed[key] = value['timestampValue']
+                  else:
+                      parsed[key] = str(value)
+              return parsed
+          
+          def query_collection(collection_name):
+              try:
+                  url = f"{base_url}/{collection_name}"
+                  params = {'key': api_key}
+                  response = requests.get(url, params=params)
+                  
+                  if response.status_code == 200:
+                      data = response.json()
+                      documents = data.get('documents', [])
+                      
+                      parsed_docs = []
+                      for doc in documents:
+                          doc_id = doc['name'].split('/')[-1]
+                          fields = doc.get('fields', {})
+                          parsed_fields = parse_firestore_fields(fields)
+                          parsed_fields['_id'] = doc_id
+                          parsed_docs.append(parsed_fields)
+                      
+                      return parsed_docs
+                  else:
+                      return []
+              except Exception as e:
+                  print(f"Error querying {collection_name}: {str(e)}")
+                  return []
+          
+          # Backup data
+          print("🔥 PlumbKings Manual Firebase Backup")
+          print("=" * 60)
+          print(f"📅 Backup Time: {datetime.now(timezone.utc).isoformat()}")
+          print(f"🎯 Reason: ${{ inputs.backup_reason }}")
+          print(f"🏗️  Project: {project_id}")
+          print("=" * 60)
+          
+          collections = ['weights', 'weightEntries', 'competitors', 'settings']
+          backup_data = {}
+          total_docs = 0
+          
+          for collection in collections:
+              print(f"\n📂 Collection: {collection}")
+              docs = query_collection(collection)
+              backup_data[collection] = docs
+              total_docs += len(docs)
+              
+              if docs:
+                  print(f"   📄 {len(docs)} documents found")
+                  if collection in ['weights', 'weightEntries']:
+                      for doc in docs[:3]:
+                          name = doc.get('name', doc.get('competitor', 'Unknown'))
+                          weight = doc.get('weight', 'N/A')
+                          date = doc.get('date', 'N/A')
+                          print(f"      - {name}: {weight} lbs on {date}")
+              else:
+                  print(f"   📭 Empty")
+          
+          print(f"\n📊 Total Documents Backed Up: {total_docs}")
+          print(f"\n💾 Complete Backup Data:")
+          print(json.dumps(backup_data, indent=2, default=str))
+          EOF
+          
+      - name: Create backup summary
+        run: |
+          echo "=== PlumbKings Firebase Backup Summary ===" > backup_summary.txt
+          echo "Date: $(date)" >> backup_summary.txt
+          echo "Reason: ${{ inputs.backup_reason }}" >> backup_summary.txt
+          echo "GitHub Run: ${{ github.run_number }}" >> backup_summary.txt
+          echo "=========================================" >> backup_summary.txt
+          
+      - name: Upload backup summary
+        uses: actions/upload-artifact@v3
+        with:
+          name: manual-backup-summary-${{ github.run_number }}
+          path: backup_summary.txt
+          retention-days: 30
