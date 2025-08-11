@@ -645,6 +645,35 @@ button[type="submit"]:active {
     text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
 }
 
+.amanda-signature {
+    margin: 20px 0;
+}
+
+.amanda-title {
+    font-size: 1.2em;
+    color: #ff6b6b;
+    font-weight: bold;
+    margin-bottom: 10px;
+    text-align: center;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.amanda-quote-box {
+    background: linear-gradient(45deg, rgba(255, 107, 107, 0.1), rgba(254, 202, 87, 0.1));
+    padding: 15px;
+    border-radius: 10px;
+    border-left: 4px solid #ff6b6b;
+    position: relative;
+}
+
+.amanda-quote-box::before {
+    content: '👑';
+    position: absolute;
+    top: -5px;
+    right: 10px;
+    font-size: 20px;
+}
+
 .submission-details {
     background: linear-gradient(45deg, #feca57, #ff9ff3);
     padding: 20px;

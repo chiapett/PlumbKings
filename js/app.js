@@ -420,25 +420,25 @@ function analyzeWeightProgress(competitor, currentWeight) {
     
     if (isFirstEntry) {
         const welcomeMessages = [
-            'Finally decided to face the music, huh?',
-            'Look who decided to join the party!',
-            'Welcome to the scale of truth!',
-            'Ready to start your transformation journey?',
-            'About time you showed up to the challenge!'
+            'Look who FINALLY decided to show up! Better late than never, I guess! 🙄',
+            'Oh wow! You actually remembered you signed up for this! Shocking! 😲',
+            'Welcome to the party! Only took you forever to get here! ⏰',
+            'Finally! I was starting to think you chickened out! 🐔',
+            'About time! I almost gave your spot away to someone who cares! 💺'
         ];
         
         const welcomeQuotes = [
-            "Welcome to the 'Less Chunky, More Funky' challenge! Better late than never!",
-            "Every journey begins with a single step... onto the scale!",
-            "Congratulations on taking the first step toward fabulousness!",
-            "The hardest part is starting - and you just did it!",
-            "Your future skinny self is already thanking you!"
+            "Listen up buttercup - Amanda doesn't accept excuses, only results!",
+            "Welcome to Amanda's world where participation trophies don't exist!",
+            "Hope you're ready because Amanda's about to become your worst nightmare... I mean, trainer!",
+            "Congratulations! You just signed up for daily reality checks from yours truly!",
+            "Pro tip: Amanda sees everything, knows everything, and judges everything!"
         ];
         
         return {
             type: 'first',
             message: welcomeMessages[Math.floor(Math.random() * welcomeMessages.length)],
-            emoji: '🎉🎊🥳',
+            emoji: '😏👑💅',
             quote: welcomeQuotes[Math.floor(Math.random() * welcomeQuotes.length)],
             celebrationLevel: 'welcome'
         };
@@ -474,25 +474,25 @@ function analyzeWeightProgress(competitor, currentWeight) {
     } else {
         // Same weight
         const sameMessages = [
-            "Perfectly balanced, as all things should be!",
-            "Consistency is key... even if it's consistently the same weight!",
-            "Zero change! You're like a weight-loss statue!",
-            "Same weight? Your scale might be broken... or very honest!",
-            "Maintaining the status quo like a champion!"
+            "Exactly the same weight? Really? Did you even try this week? 🤨",
+            "Zero change! Are you a statue or just really committed to mediocrity? 🗿",
+            "Same weight AGAIN?! I'm starting to think your scale is as lazy as you are! ⚖️",
+            "No progress? At this rate, we'll finish the challenge in 2027! 📅",
+            "Identical weight! Let me guess... you 'forgot' about the challenge? 🤔"
         ];
         
         const sameQuotes = [
-            "No change? Either you're maintaining like a pro or that scale is broken!",
-            "Sometimes the best victory is not gaining weight!",
-            "Steady as a rock! Now let's make that rock a smaller rock!",
-            "Maintenance mode activated! Time to switch to weight-loss mode!",
-            "Zero progress is still better than negative progress!"
+            "Amanda's patience is thinner than the progress you're making!",
+            "Standing still is just moving backwards in disguise!",
+            "Even my grandmother makes faster progress, and she's 85!",
+            "At this rate, you'll need a calendar instead of a scale to track progress!",
+            "I've seen paint dry with more enthusiasm than your weight loss!"
         ];
         
         return {
             type: 'same',
             message: sameMessages[Math.floor(Math.random() * sameMessages.length)],
-            emoji: '⚖️🤔😐',
+            emoji: '😑🙄�',
             quote: sameQuotes[Math.floor(Math.random() * sameQuotes.length)],
             celebrationLevel: 'neutral'
         };
@@ -501,25 +501,25 @@ function analyzeWeightProgress(competitor, currentWeight) {
 
 function getLossMessage(pounds) {
     const messages = [
-        `Holy moly! You crushed ${pounds} lbs! You're a weight-loss MACHINE! 🚀`,
-        `Boom! Down ${pounds} lbs! Someone's been eating salad instead of sadness! 🥗`,
-        `${pounds} lbs vanished! Did you hire a weight-loss magician? ✨`,
-        `Alert! We have a ${pounds} lb champion in the building! 🏆`,
-        `${pounds} lbs down! You're shrinking faster than our patience for excuses! ⚡`
+        `Well, well! Look who finally lost ${pounds} lbs! About time you stopped making excuses! �`,
+        `Amanda's shocked: ${pounds} lbs down! Holy shit, you actually listened to me for once! 👏`,
+        `Amanda admits: ${pounds} lbs lost! I was starting to think you forgot what vegetables were, sweetie! 🥗`,
+        `Amanda's verdict: ${pounds} lbs vanished! Did you finally break up with your couch, honey? 🛋️💔`,
+        `Amanda declares: ${pounds} lbs gone! Someone actually did something other than whine! Shocking! 🚨`
     ];
     
     const smallMessages = [
-        `Hey, ${pounds} lb${pounds === 1 ? '' : 's'} down is still progress! Every ounce counts! 🎯`,
-        `${pounds} lb${pounds === 1 ? '' : 's'} lighter! That's like losing a small burrito! 🌯`,
-        `Down ${pounds} lb${pounds === 1 ? '' : 's'}! Small steps, big dreams! 👣`,
-        `${pounds} lb${pounds === 1 ? '' : 's'} gone! Death by a thousand tiny victories! ⚔️`,
-        `${pounds} lb${pounds === 1 ? '' : 's'} lost! You're officially lighter than your excuses! 🎈`
+        `Amanda sighs: ${pounds} lb${pounds === 1 ? '' : 's'} down! Baby steps, honey... at least your mom will still love you! 👶`,
+        `Amanda's review: Lost ${pounds} lb${pounds === 1 ? '' : 's'}! That's adorable... are you even trying, babe? 😏`,
+        `Down ${pounds} lb${pounds === 1 ? '' : 's'}! Progress is progress, even if it's slower than molasses! �`,
+        `${pounds} lb${pounds === 1 ? '' : 's'} lighter! I've seen snails move faster, but hey, it's something! 🐌`,
+        `${pounds} lb${pounds === 1 ? '' : 's'} lost! Finally! I was about to send you a strongly worded text! 📱`
     ];
     
     if (pounds >= 5) {
         return messages[Math.floor(Math.random() * messages.length)];
     } else if (pounds >= 2) {
-        return `Nice work! Down ${pounds} lbs! Someone's been hitting the gym instead of the fridge! 💪`;
+        return `Nice work losing ${pounds} lbs! I almost can't believe my eyes... did you actually follow my advice? �`;
     } else {
         return smallMessages[Math.floor(Math.random() * smallMessages.length)];
     }
@@ -527,38 +527,38 @@ function getLossMessage(pounds) {
 
 function getLossQuote(pounds) {
     const quotes = [
-        "You're not just losing weight, you're finding your inner athlete!",
-        "Keep this up and you'll need a new belt... a smaller one!",
-        "Somewhere, a donut is crying because you chose the salad!",
-        "You're shrinking faster than our hopes of finding good pizza!",
-        "Warning: You may become dangerously attractive at this rate!"
+        "Fine, I'll admit it... you actually impressed me this time!",
+        "Don't let this go to your head - you still have a long way to go!",
+        "I guess all my nagging is finally paying off!",
+        "Look at you, actually following directions for once!",
+        "Maybe there's hope for you after all... maybe!"
     ];
     return quotes[Math.floor(Math.random() * quotes.length)];
 }
 
 function getGainMessage(pounds) {
     const bigGainMessages = [
-        `Whoa there, champ! Up ${pounds} lbs? Did you eat the entire buffet? 🍽️`,
-        `${pounds} lbs heavier! Someone discovered the joy of midnight snacking! 🌙🍪`,
-        `Up ${pounds} lbs! We see you've been conducting important 'research' at the ice cream aisle! 🍦`,
-        `${pounds} lbs gained! Did you mistake this for a weight-GAIN challenge? 📈`,
-        `Alert! ${pounds} lbs increase detected! Emergency salad deployment required! 🥗🚨`
+        `Seriously?! Up ${pounds} lbs?! Did you think this was a competitive eating contest? 🍽️`,
+        `${pounds} lbs heavier! Let me guess... you "forgot" about the challenge again? 🤔`,
+        `Up ${pounds} lbs! I specifically told you to PUT DOWN the donuts, not collect them! �`,
+        `${pounds} lbs gained! Are you trying to set a record for going backwards? 📈😤`,
+        `Really? ${pounds} lbs more?! I'm not angry, I'm just... very disappointed! �`
     ];
     
     const smallGainMessages = [
-        `Oops! Up ${pounds} lb${pounds === 1 ? '' : 's'}. Someone discovered the snack drawer! 🍪`,
-        `${pounds} lb${pounds === 1 ? '' : 's'} up! That's like gaining... well, ${pounds} lb${pounds === 1 ? '' : 's'}! 🤷‍♂️`,
-        `Up ${pounds} lb${pounds === 1 ? '' : 's'}! We blame it on heavy bones... or heavy meals! 🦴`,
-        `${pounds} lb${pounds === 1 ? '' : 's'} gained! Time to make friends with vegetables again! 🥦`,
-        `Plus ${pounds} lb${pounds === 1 ? '' : 's'}! Your scale is just being honest... brutally honest! 📏`
+        `Up ${pounds} lb${pounds === 1 ? '' : 's'}! What part of "weight LOSS" did you not understand? 🤨`,
+        `${pounds} lb${pounds === 1 ? '' : 's'} heavier! Did you mistake the fridge for a gym again? 🏋️‍♀️❌`,
+        `Gained ${pounds} lb${pounds === 1 ? '' : 's'}! I can practically hear the ice cream calling your name! 🍦`,
+        `Plus ${pounds} lb${pounds === 1 ? '' : 's'}! Next time maybe try chewing your food instead of inhaling it! 😮‍💨`,
+        `${pounds} lb${pounds === 1 ? '' : 's'} up! I'm starting to think you're doing this just to annoy me! �`
     ];
     
     const tinyGainMessages = [
-        `Gained ${pounds} lbs? That's probably just water weight... right? RIGHT?! 💧`,
-        `Up ${pounds} lbs! Could be muscle... could be that donut. We'll go with muscle! 💪🍩`,
-        `${pounds} lbs more! Maybe your clothes shrunk in the wash? 👕`,
-        `Plus ${pounds} lbs! It's not fat, it's... advanced fluffy-ness! ☁️`,
-        `${pounds} lbs up! Your body is just storing energy for future awesomeness! ⚡`
+        `Up ${pounds} lbs! That better be water weight or we're having words! 💧😡`,
+        `${pounds} lbs more! Did you weigh yourself holding a brick? Please say yes! 🧱`,
+        `Gained ${pounds} lbs! Even my patience is losing weight faster than you! ⏰`,
+        `Plus ${pounds} lbs! Your scale must be broken... right? RIGHT?! 📏😰`,
+        `${pounds} lbs heavier! I'm about to confiscate your kitchen privileges! 🔐`
     ];
     
     if (pounds >= 3) {
@@ -572,11 +572,11 @@ function getGainMessage(pounds) {
 
 function getGainQuote(pounds) {
     const quotes = [
-        "Remember: Abs are made in the kitchen, not the donut shop!",
-        "It's okay, we all have our 'research days' at the dessert table!",
-        "Consider this a temporary detour on your journey to fabulousness!",
-        "Even superheroes have cheat days... just maybe not cheat weeks!",
-        "The scale might be up, but your spirit doesn't have to be down!"
+        "I'm not mad, I'm just extremely disappointed in your life choices!",
+        "Time for some tough love - put down the fork and pick up some vegetables!",
+        "This is exactly why Amanda doesn't trust people with unsupervised snacking!",
+        "Congratulations, you've discovered how NOT to do a weight loss challenge!",
+        "I've seen toddlers with better self-control than this!"
     ];
     return quotes[Math.floor(Math.random() * quotes.length)];
 }
@@ -591,10 +591,10 @@ function updateModalContent(analysis, competitor, formattedDate, weight) {
     
     // Update header based on type
     const headers = {
-        first: '🎉 Welcome to the Challenge! 🎉',
-        loss: '🏆 WEIGHT LOSS CHAMPION! 🏆',
-        gain: '😅 Oops... Scale Check! 😅',
-        same: '⚖️ Steady as She Goes! ⚖️'
+        first: '🎉 Amanda Messages! 🎉',
+        loss: '👑 Amanda Messages! 👑',
+        gain: '� Amanda Messages! �',
+        same: '🤔 Amanda Messages! 🤔'
     };
     
     modalHeader.textContent = headers[analysis.type];
@@ -604,10 +604,10 @@ function updateModalContent(analysis, competitor, formattedDate, weight) {
     
     // Update button text based on scenario
     const buttonTexts = {
-        first: 'Let\'s Do This! 💪',
-        loss: 'Keep Crushing It! 🔥',
-        gain: 'Back to the Grind! 😤',
-        same: 'Stay Strong! 💪'
+        first: 'Don\'t Disappoint Amanda! �',
+        loss: 'Keep It Up (For Once)! �',
+        gain: 'Do Better Next Time! �',
+        same: 'Try Harder! �'
     };
     
     modalBtn.textContent = buttonTexts[analysis.type];
@@ -680,10 +680,10 @@ function handleModalBackdropClick(e) {
 
 function showSoundEffect(type) {
     const soundEffects = {
-        first: ['WELCOME!', 'HELLO!', 'START!', 'BEGIN!'],
-        loss: ['BOOM!', 'YES!', 'AMAZING!', 'CRUSHING IT!', 'FANTASTIC!'],
-        gain: ['OOPS!', 'UH OH!', 'WHOOPS!', 'YIKES!', 'OUCH!'],
-        same: ['MEH...', 'OKAY...', 'STEADY...', 'HMMMM...']
+        first: ['FINALLY!', 'ABOUT TIME!', 'SERIOUSLY?!', 'HELLO?!'],
+        loss: ['NOT BAD!', 'IMPRESSIVE!', 'FINALLY!', 'GOOD JOB!', 'SHOCKED!'],
+        gain: ['OH NO!', 'REALLY?!', 'SERIOUSLY?!', 'DISAPPOINTED!', 'UGH!'],
+        same: ['BORING...', 'YAWN...', 'REALLY?!', 'TRY HARDER!']
     };
     
     const effects = soundEffects[type];
