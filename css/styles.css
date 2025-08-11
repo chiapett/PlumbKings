@@ -528,6 +528,322 @@ button[type="submit"]:active {
     pointer-events: none;
 }
 
+/* Weight Submission Modal */
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 2000;
+    backdrop-filter: blur(5px);
+    animation: modalFadeIn 0.3s ease-out;
+}
+
+.modal.hidden {
+    display: none;
+}
+
+@keyframes modalFadeIn {
+    from {
+        opacity: 0;
+        backdrop-filter: blur(0px);
+    }
+    to {
+        opacity: 1;
+        backdrop-filter: blur(5px);
+    }
+}
+
+.modal-content {
+    background: white;
+    border-radius: 25px;
+    padding: 0;
+    max-width: 500px;
+    width: 90%;
+    max-height: 80vh;
+    overflow-y: auto;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+    border: 3px solid #ff6b6b;
+    position: relative;
+    animation: modalSlideIn 0.4s ease-out;
+}
+
+@keyframes modalSlideIn {
+    from {
+        transform: translateY(-50px) scale(0.9);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0) scale(1);
+        opacity: 1;
+    }
+}
+
+.modal-header {
+    background: linear-gradient(135deg, #ff6b6b 0%, #feca57 50%, #ff9ff3 100%);
+    color: white;
+    padding: 25px;
+    border-radius: 22px 22px 0 0;
+    text-align: center;
+    position: relative;
+}
+
+.modal-header h2 {
+    margin: 0;
+    font-size: 1.8em;
+    font-family: 'Comic Sans MS', sans-serif;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+    transform: none;
+    animation: bounce 2s ease-in-out infinite;
+}
+
+.modal-close {
+    position: absolute;
+    top: 15px;
+    right: 20px;
+    background: none;
+    border: none;
+    font-size: 30px;
+    color: white;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.modal-close:hover {
+    transform: scale(1.2) rotate(90deg);
+    color: #ffff99;
+}
+
+.modal-body {
+    padding: 30px;
+    text-align: center;
+    font-family: 'Comic Sans MS', sans-serif;
+}
+
+.celebration-emoji {
+    font-size: 4em;
+    margin-bottom: 20px;
+    animation: celebration 1s ease-in-out infinite alternate;
+}
+
+@keyframes celebration {
+    from { transform: scale(1) rotate(-5deg); }
+    to { transform: scale(1.1) rotate(5deg); }
+}
+
+.modal-message {
+    font-size: 1.4em;
+    color: #ff6b6b;
+    font-weight: bold;
+    margin-bottom: 25px;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.submission-details {
+    background: linear-gradient(45deg, #feca57, #ff9ff3);
+    padding: 20px;
+    border-radius: 15px;
+    margin: 20px 0;
+    border: 2px dashed #ff6b6b;
+}
+
+.submission-details p {
+    margin: 8px 0;
+    font-size: 1.1em;
+    color: #2c2c2c;
+}
+
+.submission-details strong {
+    color: #ff6b6b;
+    text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.8);
+}
+
+.motivational-message {
+    margin-top: 20px;
+    padding: 15px;
+    background: rgba(255, 107, 107, 0.1);
+    border-radius: 10px;
+    border-left: 4px solid #ff6b6b;
+}
+
+.quote {
+    font-style: italic;
+    font-size: 1.1em;
+    color: #666;
+    margin: 0;
+    font-weight: bold;
+}
+
+.modal-footer {
+    padding: 20px 30px 30px;
+    text-align: center;
+}
+
+.modal-btn {
+    background: linear-gradient(135deg, #ff6b6b 0%, #feca57 50%, #ff9ff3 100%);
+    color: white;
+    padding: 15px 30px;
+    border: none;
+    border-radius: 25px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+    font-family: 'Comic Sans MS', sans-serif;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+.modal-btn:hover {
+    transform: translateY(-2px) scale(1.05);
+    box-shadow: 0 8px 20px rgba(255, 107, 107, 0.4);
+    background: linear-gradient(135deg, #ff9ff3 0%, #ff6b6b 50%, #feca57 100%);
+}
+
+.modal-btn:active {
+    transform: translateY(0) scale(1.02);
+}
+
+/* Special modal celebration styles */
+.modal-content.celebration-champion .modal-header {
+    background: linear-gradient(135deg, #38a169 0%, #68d391 50%, #9ae6b4 100%);
+    animation: championGlow 2s ease-in-out infinite alternate;
+}
+
+@keyframes championGlow {
+    from { box-shadow: 0 0 20px rgba(56, 161, 105, 0.5); }
+    to { box-shadow: 0 0 30px rgba(56, 161, 105, 0.8), 0 0 40px rgba(56, 161, 105, 0.3); }
+}
+
+.modal-content.celebration-champion .celebration-emoji {
+    animation: championBounce 1s ease-in-out infinite;
+}
+
+@keyframes championBounce {
+    0%, 100% { transform: scale(1) rotate(-5deg); }
+    50% { transform: scale(1.3) rotate(5deg); }
+}
+
+.modal-content.celebration-champion::after {
+    content: '✨🎊✨🎊✨';
+    position: absolute;
+    top: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 20px;
+    animation: confetti 3s ease-in-out infinite;
+}
+
+@keyframes confetti {
+    0%, 100% { opacity: 0; transform: translateX(-50%) translateY(0); }
+    50% { opacity: 1; transform: translateX(-50%) translateY(-20px); }
+}
+
+.modal-content.celebration-shame .modal-header {
+    background: linear-gradient(135deg, #e53e3e 0%, #fc8181 50%, #feb2b2 100%);
+    animation: shameShake 0.5s ease-in-out infinite;
+}
+
+@keyframes shameShake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-2px); }
+    75% { transform: translateX(2px); }
+}
+
+.modal-content.celebration-shame .celebration-emoji {
+    animation: shameSpin 2s ease-in-out infinite;
+}
+
+@keyframes shameSpin {
+    0% { transform: scale(1) rotate(0deg); }
+    50% { transform: scale(0.9) rotate(10deg); }
+    100% { transform: scale(1) rotate(0deg); }
+}
+
+.modal-content.celebration-shame::before {
+    content: '🚨';
+    position: absolute;
+    top: 10px;
+    right: 60px;
+    font-size: 25px;
+    animation: alarmBlink 1s ease-in-out infinite;
+}
+
+@keyframes alarmBlink {
+    0%, 50% { opacity: 1; }
+    51%, 100% { opacity: 0; }
+}
+
+.modal-content.celebration-welcome .modal-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+    animation: welcomePulse 1.5s ease-in-out infinite;
+}
+
+@keyframes welcomePulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.02); }
+}
+
+.modal-content.celebration-welcome .celebration-emoji {
+    animation: welcomeParty 1.5s ease-in-out infinite;
+}
+
+@keyframes welcomeParty {
+    0%, 100% { transform: scale(1) rotate(-10deg); }
+    33% { transform: scale(1.1) rotate(10deg); }
+    66% { transform: scale(1.05) rotate(-5deg); }
+}
+
+.modal-content.celebration-welcome::after {
+    content: '🎈🎉🎈';
+    position: absolute;
+    top: -5px;
+    right: 20px;
+    font-size: 18px;
+    animation: balloons 2s ease-in-out infinite;
+}
+
+@keyframes balloons {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+}
+
+.modal-content.celebration-neutral .modal-header {
+    background: linear-gradient(135deg, #718096 0%, #a0aec0 50%, #cbd5e0 100%);
+}
+
+.modal-content.celebration-neutral .celebration-emoji {
+    animation: neutralSway 3s ease-in-out infinite;
+}
+
+@keyframes neutralSway {
+    0%, 100% { transform: translateX(0) rotate(0deg); }
+    50% { transform: translateX(5px) rotate(2deg); }
+}
+
+@keyframes neutralSway {
+    0%, 100% { transform: translateX(0) rotate(0deg); }
+    50% { transform: translateX(5px) rotate(2deg); }
+}
+
+/* Progress info styling */
+.progress-info {
+    margin-top: 10px !important;
+    padding: 10px;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.3);
+    font-weight: bold;
+    border-left: 4px solid currentColor;
+}
+
 /* Footer - Fun Style */
 footer {
     text-align: center;
@@ -562,16 +878,41 @@ footer p {
         font-size: 2em;
     }
     
+    header p {
+        font-size: 1.1em;
+    }
+    
     section {
         padding: 20px;
+        margin: 20px 0;
     }
     
-    .challenge-info {
-        padding: 10px;
+    section h2 {
+        font-size: 1.8em;
     }
     
-    .challenge-info p {
-        font-size: 0.9em;
+    .form-group input,
+    .form-group select {
+        padding: 12px;
+        font-size: 16px;
+    }
+    
+    button[type="submit"] {
+        padding: 15px 25px;
+        font-size: 16px;
+    }
+    
+    .chart-container {
+        padding: 15px;
+    }
+    
+    .chart-container h3 {
+        font-size: 1.3em;
+    }
+    
+    .loading {
+        padding: 30px;
+        font-size: 1.1em;
     }
     
     .timeline {
@@ -607,6 +948,37 @@ footer p {
     .leaderboard-table th,
     .leaderboard-table td {
         padding: 10px 5px;
+    }
+    
+    /* Modal responsive adjustments */
+    .modal-content {
+        width: 95%;
+        margin: 10px;
+    }
+    
+    .modal-header h2 {
+        font-size: 1.5em;
+    }
+    
+    .modal-body {
+        padding: 20px;
+    }
+    
+    .celebration-emoji {
+        font-size: 3em;
+    }
+    
+    .modal-message {
+        font-size: 1.2em;
+    }
+    
+    .submission-details {
+        padding: 15px;
+    }
+    
+    .modal-btn {
+        padding: 12px 25px;
+        font-size: 14px;
     }
 }
 

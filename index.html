@@ -108,6 +108,31 @@
     <!-- Success/Error Messages -->
     <div id="message" class="message hidden"></div>
 
+    <!-- Weight Submission Success Modal -->
+    <div id="weightModal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>🎉 Weight Submitted Successfully! 🎉</h2>
+                <button class="modal-close" onclick="closeWeightModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="celebration-emoji">🏆🎊💪</div>
+                <p class="modal-message">Great job stepping on the scale!</p>
+                <div class="submission-details">
+                    <p><strong>Competitor:</strong> <span id="modalCompetitor"></span></p>
+                    <p><strong>Date:</strong> <span id="modalDate"></span></p>
+                    <p><strong>Weight:</strong> <span id="modalWeight"></span> lbs</p>
+                </div>
+                <div class="motivational-message">
+                    <p class="quote">"Every step counts in your journey from chunky to hunky!"</p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="modal-btn" onclick="closeWeightModal()">Keep Going! 💪</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Conditionally load local environment config -->
     <script>
         // Load development utilities for localhost
