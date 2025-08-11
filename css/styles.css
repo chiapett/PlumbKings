@@ -1,4 +1,4 @@
-/* Global Styles */
+/* Global Styles - "Fun Fat Challenge" Theme */
 * {
     margin: 0;
     padding: 0;
@@ -6,10 +6,19 @@
 }
 
 body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    font-family: 'Comic Sans MS', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #ff6b6b 0%, #feca57 50%, #ff9ff3 100%);
+    background-image: 
+        radial-gradient(circle at 25% 25%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 75% 75%, rgba(255, 255, 255, 0.1) 0%, transparent 50%);
     min-height: 100vh;
-    color: #333;
+    color: #2c2c2c;
+    animation: backgroundShift 10s ease-in-out infinite alternate;
+}
+
+@keyframes backgroundShift {
+    0% { background-position: 0% 50%; }
+    100% { background-position: 100% 50%; }
 }
 
 .container {
@@ -18,38 +27,127 @@ body {
     padding: 20px;
 }
 
-/* Header */
+/* Header with Hero Image */
 header {
     text-align: center;
     margin-bottom: 40px;
     background: rgba(255, 255, 255, 0.95);
     padding: 30px;
-    border-radius: 15px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    border-radius: 25px;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+    border: 3px solid #ff6b6b;
+    position: relative;
+    overflow: hidden;
+}
+
+header::before {
+    content: '';
+    position: absolute;
+    top: -10px;
+    left: -10px;
+    right: -10px;
+    bottom: -10px;
+    background: url('../image000000.png.jpeg') center/cover;
+    opacity: 0.1;
+    z-index: -1;
+    border-radius: 25px;
 }
 
 header h1 {
-    font-size: 2.5em;
-    color: #4a5568;
+    font-size: 3em;
+    color: #ff6b6b;
     margin-bottom: 10px;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+    transform: rotate(-2deg);
+    display: inline-block;
+}
+
+header h1:hover {
+    transform: rotate(2deg) scale(1.05);
+    transition: transform 0.3s ease;
 }
 
 header p {
-    font-size: 1.2em;
-    color: #718096;
+    font-size: 1.4em;
+    color: #2c2c2c;
+    font-weight: bold;
+    text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.8);
 }
 
 .challenge-info {
     margin-top: 20px;
-    padding: 15px;
-    background: rgba(102, 126, 234, 0.1);
-    border-radius: 8px;
-    border-left: 4px solid #667eea;
+    padding: 20px;
+    background: linear-gradient(45deg, #feca57, #ff9ff3);
+    border-radius: 15px;
+    border: 3px dashed #ff6b6b;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+    animation: pulse 2s ease-in-out infinite alternate;
+}
+
+@keyframes pulse {
+    0% { box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1); }
+    100% { box-shadow: inset 0 4px 8px rgba(0, 0, 0, 0.2), 0 0 15px rgba(255, 107, 107, 0.4); }
 }
 
 .challenge-info p {
-    margin: 5px 0;
-    font-size: 1em;
+    margin: 8px 0;
+    font-size: 1.1em;
+    font-weight: bold;
+    color: #2c2c2c;
+}
+
+/* Section Styling */
+section {
+    background: rgba(255, 255, 255, 0.9);
+    margin: 30px 0;
+    padding: 30px;
+    border-radius: 20px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+    border: 2px solid transparent;
+    background-clip: padding-box;
+    position: relative;
+    overflow: hidden;
+}
+
+section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 5px;
+    background: linear-gradient(90deg, #ff6b6b, #feca57, #ff9ff3, #48dbfb);
+    background-size: 400% 400%;
+    animation: gradientSlide 3s ease infinite;
+}
+
+@keyframes gradientSlide {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+section h2 {
+    font-size: 2.2em;
+    color: #ff6b6b;
+    margin-bottom: 15px;
+    text-align: center;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+    transform: rotate(-1deg);
+}
+
+section h2:hover {
+    transform: rotate(1deg) scale(1.02);
+    transition: transform 0.3s ease;
+}
+
+.section-subtitle {
+    text-align: center;
+    font-size: 1.2em;
+    color: #666;
+    margin-bottom: 20px;
+    font-style: italic;
+    font-weight: bold;
 }
 
 /* Challenge Progress Timeline */
@@ -180,37 +278,80 @@ section h2 {
     color: #4a5568;
 }
 
+/* Form Styling - Fun Edition */
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: bold;
+    color: #ff6b6b;
+    font-size: 1.1em;
+}
+
 .form-group input,
 .form-group select {
-    padding: 12px;
-    border: 2px solid #e2e8f0;
-    border-radius: 8px;
+    width: 100%;
+    padding: 15px;
+    border: 3px solid #feca57;
+    border-radius: 15px;
     font-size: 16px;
-    transition: border-color 0.3s ease;
+    background: rgba(255, 255, 255, 0.9);
+    transition: all 0.3s ease;
+    font-family: 'Comic Sans MS', sans-serif;
 }
 
 .form-group input:focus,
 .form-group select:focus {
     outline: none;
-    border-color: #667eea;
-    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    border-color: #ff6b6b;
+    box-shadow: 0 0 0 5px rgba(255, 107, 107, 0.2);
+    transform: scale(1.02);
 }
 
 button[type="submit"] {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #ff6b6b 0%, #feca57 50%, #ff9ff3 100%);
     color: white;
-    padding: 15px 30px;
+    padding: 20px 40px;
     border: none;
-    border-radius: 8px;
-    font-size: 16px;
-    font-weight: 600;
+    border-radius: 25px;
+    font-size: 18px;
+    font-weight: bold;
     cursor: pointer;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    transition: all 0.3s ease;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+    font-family: 'Comic Sans MS', sans-serif;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    position: relative;
+    overflow: hidden;
+}
+
+button[type="submit"]::before {
+    content: '💪';
+    position: absolute;
+    left: -30px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 20px;
+    transition: left 0.3s ease;
 }
 
 button[type="submit"]:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+    transform: translateY(-3px) scale(1.05);
+    box-shadow: 0 10px 25px rgba(255, 107, 107, 0.4);
+    background: linear-gradient(135deg, #ff9ff3 0%, #ff6b6b 50%, #feca57 100%);
+}
+
+button[type="submit"]:hover::before {
+    left: 10px;
+}
+
+button[type="submit"]:active {
+    transform: translateY(-1px) scale(1.02);
 }
 
 /* Leaderboard */
@@ -255,19 +396,52 @@ button[type="submit"]:hover {
     color: #e53e3e;
 }
 
-/* Charts */
+/* Charts - Fun Style */
 .chart-container {
-    background: #fff;
-    border-radius: 12px;
-    padding: 20px;
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 20px;
+    padding: 25px;
     margin-bottom: 30px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+    border: 3px solid #feca57;
+    position: relative;
+    overflow: hidden;
+}
+
+.chart-container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, #ff6b6b, #feca57, #ff9ff3);
+    background-size: 200% 200%;
+    animation: gradientMove 3s ease infinite;
+}
+
+@keyframes gradientMove {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
 }
 
 .chart-container h3 {
-    margin: 0 0 20px 0;
-    color: #333;
-    font-size: 18px;
+    margin: 0 0 10px 0;
+    color: #ff6b6b;
+    font-size: 1.6em;
+    text-align: center;
+    transform: rotate(-1deg);
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.chart-subtitle {
+    text-align: center;
+    font-size: 1em;
+    color: #666;
+    margin-bottom: 20px;
+    font-style: italic;
+    font-weight: bold;
 }
 
 .chart-container canvas {
@@ -298,12 +472,34 @@ button[type="submit"]:hover {
     opacity: 0.3;
 }
 
-/* Loading */
+/* Loading - Fun Animation */
 .loading {
     text-align: center;
     padding: 40px;
-    color: #718096;
-    font-size: 1.1em;
+    color: #ff6b6b;
+    font-size: 1.2em;
+    font-weight: bold;
+    position: relative;
+    animation: bounce 2s ease-in-out infinite;
+}
+
+.loading::after {
+    content: '🍔🏃‍♂️💨';
+    display: block;
+    font-size: 2em;
+    margin-top: 10px;
+    animation: wiggle 1s ease-in-out infinite;
+}
+
+@keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+}
+
+@keyframes wiggle {
+    0%, 100% { transform: rotate(0deg); }
+    25% { transform: rotate(-5deg); }
+    75% { transform: rotate(5deg); }
 }
 
 /* Messages */
@@ -332,12 +528,28 @@ button[type="submit"]:hover {
     pointer-events: none;
 }
 
-/* Footer */
+/* Footer - Fun Style */
 footer {
     text-align: center;
     margin-top: 40px;
-    padding: 20px;
-    color: rgba(255, 255, 255, 0.8);
+    padding: 30px;
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 20px;
+    border: 3px dashed #ff6b6b;
+    color: #2c2c2c;
+    font-weight: bold;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+footer p {
+    margin: 5px 0;
+    font-size: 1.1em;
+}
+
+.footer-subtitle {
+    font-size: 0.9em !important;
+    color: #666 !important;
+    font-style: italic;
 }
 
 /* Responsive Design */

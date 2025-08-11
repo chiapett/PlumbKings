@@ -20,78 +20,88 @@
 <body>
     <div class="container">
         <header>
-            <h1>🏆 PKWLC Dashboard</h1>
-            <p>PlumbKings Weight Loss Competition</p>
+            <h1>� PKWLC Dashboard 🏃‍♂️</h1>
+            <p>PlumbKings "Less Chunky, More Funky" Competition</p>
+            <div class="hero-image">
+                <img src="image000000.png.jpeg" alt="PlumbKings Challenge" style="max-width: 200px; border-radius: 15px; margin: 15px 0; box-shadow: 0 5px 15px rgba(0,0,0,0.3);">
+            </div>
             <div class="challenge-info">
-                <p><strong>📅 Challenge Duration:</strong> August 4, 2025 - November 4, 2025 (3 months)</p>
-                <p><strong>🎯 Monthly Milestones:</strong> Track progress every month!</p>
-                <p><strong>🔥 Firebase Integration:</strong> Ready for cloud data storage!</p>
+                <p><strong>📅 Fat-to-Fit Journey:</strong> August 4, 2025 - November 4, 2025</p>
+                <p><strong>🎯 Mission:</strong> Transform from Dad Bod to Rad Bod!</p>
+                <p><strong>💪 Goal:</strong> Less belly, more jelly (the good kind)!</p>
+                <p><strong>🏆 Prize:</strong> Bragging rights & a new belt (smaller size)!</p>
             </div>
         </header>
 
         <main>
             <!-- Challenge Progress Section -->
             <section class="challenge-progress">
-                <h2>🎯 Challenge Progress</h2>
+                <h2>�➡️💪 From Chunky to Hunky Progress</h2>
                 <div id="challengeTimeline">
-                    <div class="loading">Loading challenge timeline...</div>
+                    <div class="loading">Loading your journey from flab to fab...</div>
                 </div>
             </section>
             <!-- Data Entry Section -->
             <section class="data-entry">
-                <h2>📊 Record Weight</h2>
+                <h2>⚖️ Confession Booth (Weight Check-in)</h2>
+                <p class="section-subtitle">Time to face the music... and the scale! 🎵⚖️</p>
                 <form id="weightForm">
                     <div class="form-group">
-                        <label for="competitor">Competitor:</label>
+                        <label for="competitor">Which brave soul dares to step on the scale?</label>
                         <select id="competitor" required>
-                            <option value="">Select competitor...</option>
+                            <option value="">Choose your fighter...</option>
                             <!-- Options will be populated dynamically -->
                         </select>
                     </div>
                     <div class="form-group">
-                        <label for="date">Date:</label>
+                        <label for="date">Date of reckoning:</label>
                         <input type="date" id="date" required>
                     </div>
                     <div class="form-group">
-                        <label for="weight">Weight (lbs):</label>
+                        <label for="weight">Weight (lbs) - Be honest, the scale doesn't lie! 😅</label>
                         <input type="number" id="weight" step="0.1" min="50" max="500" required>
                     </div>
-                    <button type="submit">Add Weight Entry</button>
+                    <button type="submit">Submit My Shame (or Glory!) 🎯</button>
                 </form>
             </section>
 
             <!-- Leaderboard Section -->
             <section class="leaderboard">
-                <h2>🥇 Leaderboard</h2>
+                <h2>🏆 Hall of Fame (or Shame) Leaderboard</h2>
+                <p class="section-subtitle">Who's winning the battle against the bulge? 💪</p>
                 <div id="leaderboardTable">
-                    <div class="loading">Loading leaderboard...</div>
+                    <div class="loading">Calculating who ate the least donuts...</div>
                 </div>
             </section>
 
             <!-- Charts Section -->
             <section class="charts">
-                <h2>📈 Progress Charts</h2>
+                <h2>📈 Visual Evidence of Your Journey</h2>
+                <p class="section-subtitle">Watch the numbers drop (hopefully)! 📉</p>
                 
                 <div class="chart-container">
-                    <h3>Weight Progress Over Time</h3>
+                    <h3>🍔➡️🥗 The Great Shrinkage Timeline</h3>
+                    <p class="chart-subtitle">Watch those pounds disappear (we hope)!</p>
                     <div class="chart-wrapper">
                         <canvas id="weightChart"></canvas>
-                        <div class="chart-loading" id="weightChartLoading">Loading chart...</div>
+                        <div class="chart-loading" id="weightChartLoading">Calculating donut damage...</div>
                     </div>
                 </div>
 
                 <div class="chart-container">
-                    <h3>Weight Loss Percentage Over Time</h3>
+                    <h3>📉 Percentage of Fatness Lost</h3>
+                    <p class="chart-subtitle">The higher the better (unlike your weight)!</p>
                     <div class="chart-wrapper">
                         <canvas id="percentageChart"></canvas>
-                        <div class="chart-loading" id="percentageChartLoading">Loading chart...</div>
+                        <div class="chart-loading" id="percentageChartLoading">Computing belly reduction...</div>
                     </div>
                 </div>
             </section>
         </main>
 
         <footer>
-            <p>&copy; 2025 PlumbKings Weight Loss Competition</p>
+            <p>🏆 2025 PlumbKings "From Flab to Fab" Competition 🏆</p>
+            <p class="footer-subtitle">Remember: You can't outrun a bad diet... but you can try! 🍕🏃‍♂️</p>
         </footer>
     </div>
 
