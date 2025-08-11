@@ -16,6 +16,65 @@ const colorPalette = [
     '#A8E6CF'
 ];
 
+// Fun food icons for chart points
+const foodIcons = ['🍩', '🌭', '🍔', '🍕', '🧁', '🍰', '🥨', '🥐'];
+
+// Custom point renderer for food icons
+function createFoodIcon(icon, size = 20) {
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    canvas.width = size;
+    canvas.height = size;
+    
+    // Set font for emoji
+    ctx.font = `${size - 4}px Arial`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    
+    // Draw the emoji icon
+    ctx.fillText(icon, size / 2, size / 2);
+    
+    return canvas;
+}
+
+// Plugin to draw custom food icons as points
+const foodIconPlugin = {
+    id: 'foodIcons',
+    afterDatasetsDraw(chart) {
+        const ctx = chart.ctx;
+        
+        chart.data.datasets.forEach((dataset, datasetIndex) => {
+            const meta = chart.getDatasetMeta(datasetIndex);
+            
+            if (!meta.hidden && dataset.pointIcon) {
+                meta.data.forEach((point, index) => {
+                    if (point.skip) return;
+                    
+                    const { x, y } = point.getProps(['x', 'y'], true);
+                    
+                    // Save current context
+                    ctx.save();
+                    
+                    // Create icon canvas
+                    const iconCanvas = createFoodIcon(dataset.pointIcon, dataset.pointRadius * 2 || 20);
+                    
+                    // Draw the icon at the point position
+                    ctx.drawImage(
+                        iconCanvas, 
+                        x - (iconCanvas.width / 2), 
+                        y - (iconCanvas.height / 2),
+                        iconCanvas.width,
+                        iconCanvas.height
+                    );
+                    
+                    // Restore context
+                    ctx.restore();
+                });
+            }
+        });
+    }
+};
+
 // Format date for display
 function formatDate(date) {
     const options = { month: 'short', day: 'numeric', year: 'numeric' };
@@ -79,21 +138,39 @@ function renderWeightChart() {
             data: {
                 datasets: datasets
             },
+            plugins: [foodIconPlugin], // Register our custom plugin
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
                 plugins: {
                     title: {
                         display: true,
-                        text: 'Weight Progress Over Time',
+                        text: '🍔➡️💪 Weight Progress Over Time',
                         font: {
-                            size: 16,
+                            size: 18,
                             weight: 'bold'
-                        }
+                        },
+                        color: '#ff6b6b'
                     },
                     legend: {
                         display: true,
-                        position: 'top'
+                        position: 'top',
+                        labels: {
+                            usePointStyle: true,
+                            generateLabels: function(chart) {
+                                const original = Chart.defaults.plugins.legend.labels.generateLabels;
+                                const labels = original.call(this, chart);
+                                
+                                // Add food icons to legend
+                                labels.forEach((label, index) => {
+                                    if (chart.data.datasets[index] && chart.data.datasets[index].pointIcon) {
+                                        label.text = `${chart.data.datasets[index].pointIcon} ${label.text}`;
+                                    }
+                                });
+                                
+                                return labels;
+                            }
+                        }
                     },
                     tooltip: {
                         mode: 'index',
@@ -176,13 +253,14 @@ function renderPercentageChart() {
             data: {
                 datasets: datasets
             },
+            plugins: [foodIconPlugin],
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
                 plugins: {
                     title: {
                         display: true,
-                        text: 'Weight Loss Percentage Over Time',
+                        text: '🍩 Weight Loss Percentage Over Time 🌭',
                         font: {
                             size: 16,
                             weight: 'bold'
@@ -288,9 +366,12 @@ function createWeightDatasets() {
                 backgroundColor: colorPalette[colorIndex % colorPalette.length] + '20',
                 tension: 0.1,
                 fill: false,
-                pointRadius: 4,
-                pointHoverRadius: 6,
-                borderWidth: 2
+                pointRadius: 0, // Hide default points
+                pointHoverRadius: 0,
+                borderWidth: 2,
+                // Custom properties for food icons
+                pointIcon: foodIcons[colorIndex % foodIcons.length],
+                pointIconSize: 20
             });
         }
         colorIndex++;
@@ -348,9 +429,12 @@ function createPercentageDatasets() {
                 backgroundColor: colorPalette[colorIndex % colorPalette.length] + '20',
                 tension: 0.1,
                 fill: false,
-                pointRadius: 4,
-                pointHoverRadius: 6,
-                borderWidth: 2
+                pointRadius: 0, // Hide default points  
+                pointHoverRadius: 0,
+                borderWidth: 2,
+                // Custom properties for food icons
+                pointIcon: foodIcons[colorIndex % foodIcons.length],
+                pointIconSize: 20
             });
         }
         colorIndex++;
