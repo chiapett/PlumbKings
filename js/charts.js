@@ -1,6 +1,8 @@
 // Chart configuration and rendering
 let weightChart = null;
 let percentageChart = null;
+let rateChart = null;
+let leaderboardChart = null;
 
 // Color palette for competitors (9 distinct colors)
 const colorPalette = [
@@ -99,6 +101,8 @@ function renderChartsInternal() {
     console.log('Rendering charts internal...');
     renderWeightChart();
     renderPercentageChart();
+    renderRateChart();
+    renderLeaderboardChart();
 }
 
 function renderWeightChart() {
@@ -456,6 +460,363 @@ function updateCharts() {
     if (percentageChart) {
         percentageChart.data.datasets = createPercentageDatasets();
         percentageChart.update();
+    }
+    
+    if (rateChart) {
+        renderRateChart();
+    }
+    
+    if (leaderboardChart) {
+        renderLeaderboardChart();
+    }
+}
+
+// Create weight loss rate datasets
+function createRateDatasets() {
+    const datasets = [];
+    const competitorDataMap = {};
+    
+    // Get weight data from global PKWLC object
+    const weightData = window.PKWLC?.weightData || [];
+    
+    if (weightData.length === 0) {
+        return [];
+    }
+    
+    // Group data by competitor
+    weightData.forEach(entry => {
+        if (!competitorDataMap[entry.name]) {
+            competitorDataMap[entry.name] = [];
+        }
+        const date = entry.date instanceof Date ? entry.date : new Date(entry.date);
+        competitorDataMap[entry.name].push({
+            date: date,
+            weight: parseFloat(entry.weight)
+        });
+    });
+    
+    // Create rate datasets for each competitor
+    let colorIndex = 0;
+    const competitors = window.PKWLC?.competitors || Object.keys(competitorDataMap);
+    
+    competitors.forEach(competitor => {
+        const entries = competitorDataMap[competitor];
+        if (entries && entries.length > 1) {
+            // Sort by date
+            entries.sort((a, b) => a.date - b.date);
+            
+            const rateData = [];
+            
+            // Calculate rate between consecutive entries
+            for (let i = 1; i < entries.length; i++) {
+                const prevEntry = entries[i - 1];
+                const currEntry = entries[i];
+                
+                const daysDiff = (currEntry.date - prevEntry.date) / (1000 * 60 * 60 * 24);
+                const weeksDiff = daysDiff / 7;
+                
+                if (weeksDiff > 0) {
+                    const weightDiff = prevEntry.weight - currEntry.weight; // Positive = loss
+                    const lbsPerWeek = weightDiff / weeksDiff;
+                    
+                    rateData.push({
+                        x: currEntry.date.getTime(),
+                        y: lbsPerWeek
+                    });
+                }
+            }
+            
+            if (rateData.length > 0) {
+                datasets.push({
+                    label: competitor,
+                    data: rateData,
+                    borderColor: colorPalette[colorIndex % colorPalette.length],
+                    backgroundColor: colorPalette[colorIndex % colorPalette.length] + '20',
+                    tension: 0.3,
+                    fill: false,
+                    pointRadius: 5,
+                    pointHoverRadius: 7,
+                    borderWidth: 2
+                });
+            }
+        }
+        colorIndex++;
+    });
+    
+    return datasets;
+}
+
+// Render weight loss rate chart
+function renderRateChart() {
+    try {
+        const canvas = document.getElementById('rateChart');
+        if (!canvas) {
+            console.error('Rate chart canvas not found');
+            return;
+        }
+        
+        const loading = document.getElementById('rateChartLoading');
+        if (loading) loading.style.display = 'none';
+        
+        const ctx = canvas.getContext('2d');
+        
+        if (rateChart) {
+            rateChart.destroy();
+        }
+        
+        const datasets = createRateDatasets();
+        
+        if (datasets.length === 0) {
+            ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+            ctx.font = '16px Arial';
+            ctx.fillStyle = '#666';
+            ctx.textAlign = 'center';
+            ctx.fillText('Not enough data for rate calculation', ctx.canvas.width / 2, ctx.canvas.height / 2);
+            return;
+        }
+
+        rateChart = new Chart(ctx, {
+            type: 'line',
+            data: { datasets: datasets },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: '📈 Weight Loss Rate (lbs/week)',
+                        font: { size: 18, weight: 'bold' },
+                        color: '#ff6b6b'
+                    },
+                    legend: {
+                        display: true,
+                        position: 'top'
+                    },
+                    tooltip: {
+                        mode: 'index',
+                        intersect: false,
+                        callbacks: {
+                            title: function(tooltipItems) {
+                                return formatDate(new Date(tooltipItems[0].parsed.x));
+                            },
+                            label: function(context) {
+                                const rate = context.parsed.y;
+                                const sign = rate >= 0 ? '+' : '';
+                                return `${context.dataset.label}: ${sign}${rate.toFixed(2)} lbs/week`;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        type: 'time',
+                        time: {
+                            unit: 'day',
+                            displayFormats: { day: 'MMM dd' }
+                        },
+                        title: {
+                            display: true,
+                            text: 'Date'
+                        }
+                    },
+                    y: {
+                        title: {
+                            display: true,
+                            text: 'Weight Loss Rate (lbs/week)'
+                        },
+                        ticks: {
+                            callback: function(value) {
+                                return value.toFixed(1) + ' lbs/wk';
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    } catch (error) {
+        console.error('Error rendering rate chart:', error);
+    }
+}
+
+// Create leaderboard timeline datasets
+function createLeaderboardDatasets() {
+    const weightData = window.PKWLC?.weightData || [];
+    
+    if (weightData.length === 0) {
+        return [];
+    }
+    
+    // Get all unique dates
+    const allDates = [...new Set(weightData.map(e => {
+        const date = e.date instanceof Date ? e.date : new Date(e.date);
+        return date.toDateString();
+    }))].sort((a, b) => new Date(a) - new Date(b));
+    
+    // Calculate cumulative weight loss at each date
+    const competitorProgress = {};
+    const competitors = window.PKWLC?.competitors || [];
+    
+    competitors.forEach(comp => {
+        competitorProgress[comp] = [];
+    });
+    
+    allDates.forEach(dateStr => {
+        const date = new Date(dateStr);
+        
+        // Calculate weight loss up to this date for each competitor
+        const rankings = [];
+        
+        competitors.forEach(competitor => {
+            const entries = weightData
+                .filter(e => e.name === competitor)
+                .map(e => ({
+                    date: e.date instanceof Date ? e.date : new Date(e.date),
+                    weight: e.weight
+                }))
+                .sort((a, b) => a.date - b.date)
+                .filter(e => e.date <= date);
+            
+            if (entries.length > 0) {
+                const startWeight = entries[0].weight;
+                const currentWeight = entries[entries.length - 1].weight;
+                const weightLoss = startWeight - currentWeight;
+                
+                rankings.push({
+                    name: competitor,
+                    weightLoss: weightLoss
+                });
+            }
+        });
+        
+        // Sort by weight loss (descending)
+        rankings.sort((a, b) => b.weightLoss - a.weightLoss);
+        
+        // Store rank for each competitor at this date
+        rankings.forEach((comp, index) => {
+            competitorProgress[comp.name].push({
+                x: date.getTime(),
+                y: index + 1 // Rank (1 = first place)
+            });
+        });
+    });
+    
+    // Create datasets
+    const datasets = [];
+    let colorIndex = 0;
+    
+    competitors.forEach(competitor => {
+        if (competitorProgress[competitor].length > 0) {
+            datasets.push({
+                label: competitor,
+                data: competitorProgress[competitor],
+                borderColor: colorPalette[colorIndex % colorPalette.length],
+                backgroundColor: colorPalette[colorIndex % colorPalette.length] + '40',
+                tension: 0.2,
+                fill: false,
+                pointRadius: 6,
+                pointHoverRadius: 8,
+                borderWidth: 3
+            });
+        }
+        colorIndex++;
+    });
+    
+    return datasets;
+}
+
+// Render leaderboard timeline chart
+function renderLeaderboardChart() {
+    try {
+        const canvas = document.getElementById('leaderboardChart');
+        if (!canvas) {
+            console.error('Leaderboard chart canvas not found');
+            return;
+        }
+        
+        const loading = document.getElementById('leaderboardChartLoading');
+        if (loading) loading.style.display = 'none';
+        
+        const ctx = canvas.getContext('2d');
+        
+        if (leaderboardChart) {
+            leaderboardChart.destroy();
+        }
+        
+        const datasets = createLeaderboardDatasets();
+        
+        if (datasets.length === 0) {
+            ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+            ctx.font = '16px Arial';
+            ctx.fillStyle = '#666';
+            ctx.textAlign = 'center';
+            ctx.fillText('No data available for leaderboard timeline', ctx.canvas.width / 2, ctx.canvas.height / 2);
+            return;
+        }
+
+        leaderboardChart = new Chart(ctx, {
+            type: 'line',
+            data: { datasets: datasets },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: '🏆 Weekly Leaderboard Evolution',
+                        font: { size: 18, weight: 'bold' },
+                        color: '#ff6b6b'
+                    },
+                    legend: {
+                        display: true,
+                        position: 'top'
+                    },
+                    tooltip: {
+                        mode: 'index',
+                        intersect: false,
+                        callbacks: {
+                            title: function(tooltipItems) {
+                                return formatDate(new Date(tooltipItems[0].parsed.x));
+                            },
+                            label: function(context) {
+                                const rank = context.parsed.y;
+                                const medal = rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : '';
+                                return `${context.dataset.label}: #${rank} ${medal}`;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        type: 'time',
+                        time: {
+                            unit: 'day',
+                            displayFormats: { day: 'MMM dd' }
+                        },
+                        title: {
+                            display: true,
+                            text: 'Date'
+                        }
+                    },
+                    y: {
+                        reverse: true, // Lower rank number = higher on chart
+                        title: {
+                            display: true,
+                            text: 'Leaderboard Position'
+                        },
+                        ticks: {
+                            stepSize: 1,
+                            callback: function(value) {
+                                const medal = value === 1 ? '🥇' : value === 2 ? '🥈' : value === 3 ? '🥉' : '';
+                                return `#${value} ${medal}`;
+                            }
+                        },
+                        min: 1
+                    }
+                }
+            }
+        });
+    } catch (error) {
+        console.error('Error rendering leaderboard chart:', error);
     }
 }
 
