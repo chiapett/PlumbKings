@@ -4,24 +4,39 @@ let percentageChart = null;
 let rateChart = null;
 let leaderboardChart = null;
 
-// Color palette for competitors (9 distinct colors)
+// Apple-inspired color palette - works well in light and dark modes
 const colorPalette = [
-    '#FF6384', // Ben - Pink/Red
-    '#36A2EB', // Brien - Blue  
-    '#FFCE56', // Carl - Yellow
-    '#4BC0C0', // Keith - Teal
-    '#66CC99', // Rich - Mint Green
-    '#9966FF', // Ryan - Purple
-    '#FF9F40', // Stephen - Orange
-    '#FF6B9D', // Spencer - Light Pink
-    '#C9CBCF', // Tristan - Gray
-    '#FF8C94', // Extra colors if needed
-    '#A8E6CF'
+    '#007AFF', // Ben - iOS Blue
+    '#5AC8FA', // Brien - Light Blue
+    '#FF9500', // Carl - Orange
+    '#34C759', // Keith - Green
+    '#AF52DE', // Rich - Purple
+    '#FF2D55', // Ryan - Pink
+    '#FF9F0A', // Stephen - Yellow
+    '#32ADE6', // Spencer - Cyan
+    '#8E8E93', // Tristan - Gray
+    '#FF6482', // Extra colors if needed
+    '#5856D6'  // Indigo
 ];
 
 // Fun food icons for chart points
 const foodIcons = ['🍩', '🌭', '🍔', '🍕', '🍆', '🧁', '🍰', '🥨', '🥐'];
 // Ben, Brien, Carl, Keith, Rich, Ryan, Stephen, Spencer, Tristan
+
+// Detect dark mode
+function isDarkMode() {
+    return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+}
+
+// Get text color based on theme
+function getTextColor() {
+    return isDarkMode() ? '#f5f5f7' : '#1d1d1f';
+}
+
+// Get grid color based on theme
+function getGridColor() {
+    return isDarkMode() ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.05)';
+}
 
 // Custom point renderer for food icons
 function createFoodIcon(icon, size = 20) {
@@ -132,8 +147,8 @@ function renderWeightChart() {
         if (datasets.length === 0) {
             // Show no data message
             ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-            ctx.font = '16px Arial';
-            ctx.fillStyle = '#666';
+            ctx.font = '16px -apple-system, BlinkMacSystemFont, sans-serif';
+            ctx.fillStyle = getTextColor();
             ctx.textAlign = 'center';
             ctx.fillText('No weight data available', ctx.canvas.width / 2, ctx.canvas.height / 2);
             return;
@@ -151,18 +166,24 @@ function renderWeightChart() {
                 plugins: {
                     title: {
                         display: true,
-                        text: '🍔➡️💪 Weight Progress Over Time',
+                        text: 'Weight Progress Over Time',
                         font: {
-                            size: 18,
-                            weight: 'bold'
+                            size: 20,
+                            weight: '600',
+                            family: '-apple-system, BlinkMacSystemFont, sans-serif'
                         },
-                        color: '#ff6b6b'
+                        color: getTextColor()
                     },
                     legend: {
                         display: true,
                         position: 'top',
                         labels: {
                             usePointStyle: true,
+                            color: getTextColor(),
+                            font: {
+                                family: '-apple-system, BlinkMacSystemFont, sans-serif',
+                                size: 13
+                            },
                             generateLabels: function(chart) {
                                 const original = Chart.defaults.plugins.legend.labels.generateLabels;
                                 const labels = original.call(this, chart);
@@ -202,13 +223,37 @@ function renderWeightChart() {
                         },
                         title: {
                             display: true,
-                            text: 'Date'
+                            text: 'Date',
+                            color: getTextColor(),
+                            font: {
+                                family: '-apple-system, BlinkMacSystemFont, sans-serif',
+                                size: 13,
+                                weight: '500'
+                            }
+                        },
+                        ticks: {
+                            color: getTextColor()
+                        },
+                        grid: {
+                            color: getGridColor()
                         }
                     },
                     y: {
                         title: {
                             display: true,
-                            text: 'Weight (lbs)'
+                            text: 'Weight (lbs)',
+                            color: getTextColor(),
+                            font: {
+                                family: '-apple-system, BlinkMacSystemFont, sans-serif',
+                                size: 13,
+                                weight: '500'
+                            }
+                        },
+                        ticks: {
+                            color: getTextColor()
+                        },
+                        grid: {
+                            color: getGridColor()
                         },
                         beginAtZero: false
                     }
@@ -266,15 +311,42 @@ function renderPercentageChart() {
                 plugins: {
                     title: {
                         display: true,
-                        text: '🍩 Weight Loss Percentage Over Time 🌭',
+                        text: 'Weight Loss Percentage',
+                        color: getTextColor(),
                         font: {
-                            size: 16,
-                            weight: 'bold'
+                            family: '-apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif',
+                            size: 20,
+                            weight: '600'
+                        },
+                        padding: {
+                            top: 10,
+                            bottom: 20
                         }
                     },
                     legend: {
                         display: true,
-                        position: 'top'
+                        position: 'top',
+                        labels: {
+                            usePointStyle: true,
+                            color: getTextColor(),
+                            font: {
+                                family: '-apple-system, BlinkMacSystemFont, sans-serif',
+                                size: 13
+                            },
+                            generateLabels: function(chart) {
+                                const original = Chart.defaults.plugins.legend.labels.generateLabels;
+                                const labels = original.call(this, chart);
+                                
+                                // Add food icons to legend
+                                labels.forEach((label, index) => {
+                                    if (chart.data.datasets[index] && chart.data.datasets[index].pointIcon) {
+                                        label.text = `${chart.data.datasets[index].pointIcon} ${label.text}`;
+                                    }
+                                });
+                                
+                                return labels;
+                            }
+                        }
                     },
                     tooltip: {
                         mode: 'index',
@@ -302,18 +374,40 @@ function renderPercentageChart() {
                         },
                         title: {
                             display: true,
-                            text: 'Date'
+                            text: 'Date',
+                            color: getTextColor(),
+                            font: {
+                                family: '-apple-system, BlinkMacSystemFont, sans-serif',
+                                size: 13,
+                                weight: '500'
+                            }
+                        },
+                        ticks: {
+                            color: getTextColor()
+                        },
+                        grid: {
+                            color: getGridColor()
                         }
                     },
                     y: {
                         title: {
                             display: true,
-                            text: 'Weight Loss Percentage (%)'
+                            text: 'Weight Loss Percentage (%)',
+                            color: getTextColor(),
+                            font: {
+                                family: '-apple-system, BlinkMacSystemFont, sans-serif',
+                                size: 13,
+                                weight: '500'
+                            }
                         },
                         ticks: {
+                            color: getTextColor(),
                             callback: function(value) {
                                 return value + '%';
                             }
+                        },
+                        grid: {
+                            color: getGridColor()
                         }
                     }
                 },
@@ -584,13 +678,29 @@ function renderRateChart() {
                 plugins: {
                     title: {
                         display: true,
-                        text: '📈 Weight Loss Rate (lbs/week)',
-                        font: { size: 18, weight: 'bold' },
-                        color: '#ff6b6b'
+                        text: 'Weight Loss Rate',
+                        color: getTextColor(),
+                        font: {
+                            family: '-apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif',
+                            size: 20,
+                            weight: '600'
+                        },
+                        padding: {
+                            top: 10,
+                            bottom: 20
+                        }
                     },
                     legend: {
                         display: true,
-                        position: 'top'
+                        position: 'top',
+                        labels: {
+                            usePointStyle: true,
+                            color: getTextColor(),
+                            font: {
+                                family: '-apple-system, BlinkMacSystemFont, sans-serif',
+                                size: 13
+                            }
+                        }
                     },
                     tooltip: {
                         mode: 'index',
@@ -616,18 +726,40 @@ function renderRateChart() {
                         },
                         title: {
                             display: true,
-                            text: 'Date'
+                            text: 'Date',
+                            color: getTextColor(),
+                            font: {
+                                family: '-apple-system, BlinkMacSystemFont, sans-serif',
+                                size: 13,
+                                weight: '500'
+                            }
+                        },
+                        ticks: {
+                            color: getTextColor()
+                        },
+                        grid: {
+                            color: getGridColor()
                         }
                     },
                     y: {
                         title: {
                             display: true,
-                            text: 'Weight Loss Rate (lbs/week)'
+                            text: 'Weight Loss Rate (lbs/week)',
+                            color: getTextColor(),
+                            font: {
+                                family: '-apple-system, BlinkMacSystemFont, sans-serif',
+                                size: 13,
+                                weight: '500'
+                            }
                         },
                         ticks: {
+                            color: getTextColor(),
                             callback: function(value) {
                                 return value.toFixed(1) + ' lbs/wk';
                             }
+                        },
+                        grid: {
+                            color: getGridColor()
                         }
                     }
                 }
@@ -762,13 +894,29 @@ function renderLeaderboardChart() {
                 plugins: {
                     title: {
                         display: true,
-                        text: '🏆 Weekly Leaderboard Evolution',
-                        font: { size: 18, weight: 'bold' },
-                        color: '#ff6b6b'
+                        text: 'Weekly Leaderboard Evolution',
+                        color: getTextColor(),
+                        font: {
+                            family: '-apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif',
+                            size: 20,
+                            weight: '600'
+                        },
+                        padding: {
+                            top: 10,
+                            bottom: 20
+                        }
                     },
                     legend: {
                         display: true,
-                        position: 'top'
+                        position: 'top',
+                        labels: {
+                            usePointStyle: true,
+                            color: getTextColor(),
+                            font: {
+                                family: '-apple-system, BlinkMacSystemFont, sans-serif',
+                                size: 13
+                            }
+                        }
                     },
                     tooltip: {
                         mode: 'index',
@@ -794,21 +942,43 @@ function renderLeaderboardChart() {
                         },
                         title: {
                             display: true,
-                            text: 'Date'
+                            text: 'Date',
+                            color: getTextColor(),
+                            font: {
+                                family: '-apple-system, BlinkMacSystemFont, sans-serif',
+                                size: 13,
+                                weight: '500'
+                            }
+                        },
+                        ticks: {
+                            color: getTextColor()
+                        },
+                        grid: {
+                            color: getGridColor()
                         }
                     },
                     y: {
                         reverse: true, // Lower rank number = higher on chart
                         title: {
                             display: true,
-                            text: 'Leaderboard Position'
+                            text: 'Leaderboard Position',
+                            color: getTextColor(),
+                            font: {
+                                family: '-apple-system, BlinkMacSystemFont, sans-serif',
+                                size: 13,
+                                weight: '500'
+                            }
                         },
                         ticks: {
+                            color: getTextColor(),
                             stepSize: 1,
                             callback: function(value) {
                                 const medal = value === 1 ? '🥇' : value === 2 ? '🥈' : value === 3 ? '🥉' : '';
                                 return `#${value} ${medal}`;
                             }
+                        },
+                        grid: {
+                            color: getGridColor()
                         },
                         min: 1
                     }
