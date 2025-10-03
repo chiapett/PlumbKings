@@ -42,9 +42,6 @@ async function initializeApp() {
             throw new Error('Database not initialized');
         }
         
-        // Add database indicator to the page
-        addDatabaseIndicator();
-        
         // Set today's date as default
         dateInput.valueAsDate = new Date();
         
@@ -69,24 +66,54 @@ async function initializeApp() {
     }
 }
 
-function addDatabaseIndicator() {
-    const header = document.querySelector('header');
-    const isFirebase = db.collection && typeof firebase !== 'undefined';
-    const indicator = document.createElement('div');
-    indicator.style.cssText = `
-        background: ${isFirebase ? '#d4edda' : '#fff3cd'};
-        color: ${isFirebase ? '#155724' : '#856404'};
-        padding: 10px;
-        margin: 10px 0;
-        border-radius: 5px;
-        border: 1px solid ${isFirebase ? '#c3e6cb' : '#ffeaa7'};
-        text-align: center;
-        font-weight: bold;
-    `;
-    indicator.innerHTML = isFirebase ? 
-        '🔥 Using Firebase Firestore Database' : 
-        '🗄️ Using Local Test Database';
-    header.appendChild(indicator);
+function getBiggestLoserForMilestone(milestoneDate) {
+    // Calculate weight loss up to the milestone date
+    const competitorProgress = {};
+    
+    // Initialize competitor data
+    competitors.forEach(competitor => {
+        competitorProgress[competitor] = {
+            name: competitor,
+            startWeight: null,
+            milestoneWeight: null,
+            weightLoss: 0
+        };
+    });
+    
+    // Process weight entries up to milestone date
+    weightData.forEach(entry => {
+        const entryDate = entry.date instanceof Date ? entry.date : new Date(entry.date);
+        
+        if (entryDate <= milestoneDate && competitorProgress[entry.name]) {
+            // Set start weight (first entry)
+            if (!competitorProgress[entry.name].startWeight) {
+                competitorProgress[entry.name].startWeight = entry.weight;
+            }
+            
+            // Update milestone weight (last entry before or on milestone date)
+            if (!competitorProgress[entry.name].milestoneWeight || entryDate > new Date(competitorProgress[entry.name].lastDate)) {
+                competitorProgress[entry.name].milestoneWeight = entry.weight;
+                competitorProgress[entry.name].lastDate = entryDate;
+            }
+        }
+    });
+    
+    // Calculate weight loss for each competitor
+    let biggestLoser = null;
+    let maxWeightLoss = 0;
+    
+    Object.values(competitorProgress).forEach(competitor => {
+        if (competitor.startWeight && competitor.milestoneWeight) {
+            competitor.weightLoss = competitor.startWeight - competitor.milestoneWeight;
+            
+            if (competitor.weightLoss > maxWeightLoss) {
+                maxWeightLoss = competitor.weightLoss;
+                biggestLoser = competitor;
+            }
+        }
+    });
+    
+    return biggestLoser;
 }
 
 function renderChallengeTimeline() {
@@ -128,7 +155,7 @@ function renderChallengeTimeline() {
         </div>
     `;
     
-    // Add monthly milestones
+    // Add monthly milestones with biggest loser info
     challengeConfig.milestones.forEach(milestone => {
         let milestoneClass = 'upcoming';
         if (today >= milestone.date) {
@@ -137,11 +164,26 @@ function renderChallengeTimeline() {
             milestoneClass = 'current';
         }
         
+        // Get biggest loser for this milestone if it has passed
+        let biggestLoserInfo = '';
+        if (today >= milestone.date && weightData.length > 0) {
+            const biggestLoser = getBiggestLoserForMilestone(milestone.date);
+            if (biggestLoser && biggestLoser.weightLoss > 0) {
+                biggestLoserInfo = `
+                    <div class="milestone-winner">
+                        🏆 Biggest Loser: ${biggestLoser.name}<br>
+                        Lost ${biggestLoser.weightLoss.toFixed(1)} lbs
+                    </div>
+                `;
+            }
+        }
+        
         html += `
             <div class="milestone ${milestoneClass}">
                 <div class="milestone-date">${formatDate(milestone.date)}</div>
                 <div class="milestone-name">${milestone.name}</div>
                 <div class="milestone-description">${milestone.description}</div>
+                ${biggestLoserInfo}
             </div>
         `;
     });
