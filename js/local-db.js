@@ -250,7 +250,7 @@ if (forceClearData) {
 if (generateSampleData && Object.keys(localDB.collections).length === 0) {
     console.log('🗄️ Initializing local test database with sample data...');
     
-    const competitors = ['Ben', 'Brien', 'Carl', 'Keith', 'Ryan', 'Stephen', 'Spencer', 'Tristan'];
+    const competitors = ['Ben', 'Brien', 'Carl', 'Keith', 'Rich', 'Ryan', 'Stephen', 'Spencer', 'Tristan'];
     const sampleData = [];
     
     // Generate sample data for each competitor
@@ -340,7 +340,7 @@ window.dbExport = function() {
 window.dbSample = async function() {
     console.log('🗄️ Adding sample data...');
     
-    const competitors = ['Ben', 'Brien', 'Carl', 'Keith', 'Ryan', 'Stephen', 'Spencer', 'Tristan'];
+    const competitors = ['Ben', 'Brien', 'Carl', 'Keith', 'Rich', 'Ryan', 'Stephen', 'Spencer', 'Tristan'];
     const sampleData = [];
     
     // Generate sample data for each competitor

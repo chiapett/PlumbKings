@@ -97,7 +97,7 @@ class LocalDBManager {
             return false;
         }
 
-        const competitors = ['Ben', 'Brien', 'Carl', 'Keith', 'Ryan', 'Stephen', 'Spencer', 'Tristan'];
+        const competitors = ['Ben', 'Brien', 'Carl', 'Keith', 'Rich', 'Ryan', 'Stephen', 'Spencer', 'Tristan'];
         const sampleData = [];
         
         // Generate sample data for each competitor

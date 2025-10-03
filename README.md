@@ -5,7 +5,7 @@ A Firebase-powered dashboard for tracking the 3-month PlumbKings weight loss cha
 ## 🏆 Current Challenge
 
 **Duration:** August 4, 2025 - November 4, 2025 (3 months)  
-**Participants:** Ben, Brien, Carl, Keith, Ryan, Stephen, Spencer, Tristan  
+**Participants:** Ben, Brien, Carl, Keith, Rich, Ryan, Stephen, Spencer, Tristan  
 **Format:** Monthly milestones with overall 3-month competition  
 
 ### 📅 Challenge Milestones

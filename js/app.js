@@ -1,5 +1,5 @@
 // Application state
-let competitors = ['Ben', 'Brien', 'Carl', 'Keith', 'Ryan', 'Stephen', 'Spencer', 'Tristan'];
+let competitors = ['Ben', 'Brien', 'Carl', 'Keith', 'Rich', 'Ryan', 'Stephen', 'Spencer', 'Tristan'];
 let weightData = [];
 let charts = {};
 

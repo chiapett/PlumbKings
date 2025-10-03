@@ -50,6 +50,12 @@
       "color": "#4BC0C0"
     },
     {
+      "name": "Rich",
+      "startWeight": null,
+      "goalWeight": null,
+      "color": "#66CC99"
+    },
+    {
       "name": "Ryan",
       "startWeight": null,
       "goalWeight": null,

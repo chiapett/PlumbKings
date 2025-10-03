@@ -2,12 +2,13 @@
 let weightChart = null;
 let percentageChart = null;
 
-// Color palette for competitors (8 distinct colors)
+// Color palette for competitors (9 distinct colors)
 const colorPalette = [
     '#FF6384', // Ben - Pink/Red
     '#36A2EB', // Brien - Blue  
     '#FFCE56', // Carl - Yellow
     '#4BC0C0', // Keith - Teal
+    '#66CC99', // Rich - Mint Green
     '#9966FF', // Ryan - Purple
     '#FF9F40', // Stephen - Orange
     '#FF6B9D', // Spencer - Light Pink
@@ -17,7 +18,8 @@ const colorPalette = [
 ];
 
 // Fun food icons for chart points
-const foodIcons = ['🍩', '🌭', '🍔', '🍕', '🧁', '🍰', '🥨', '🥐'];
+const foodIcons = ['🍩', '🌭', '🍔', '🍕', '🍆', '🧁', '🍰', '🥨', '🥐'];
+// Ben, Brien, Carl, Keith, Rich, Ryan, Stephen, Spencer, Tristan
 
 // Custom point renderer for food icons
 function createFoodIcon(icon, size = 20) {
