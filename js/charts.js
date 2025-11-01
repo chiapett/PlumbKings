@@ -28,6 +28,39 @@ function isDarkMode() {
     return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
 }
 
+// Detect if we're on mobile
+function isMobile() {
+    return window.innerWidth <= 768;
+}
+
+// Get responsive chart configuration
+function getResponsiveConfig() {
+    const mobile = isMobile();
+    return {
+        legend: {
+            position: mobile ? 'bottom' : 'top',
+            maxHeight: mobile ? 100 : undefined,
+            labels: {
+                boxWidth: mobile ? 10 : 12,
+                font: {
+                    size: mobile ? 10 : 13
+                },
+                padding: mobile ? 8 : 10
+            }
+        },
+        title: {
+            font: {
+                size: mobile ? 16 : 20
+            },
+            padding: {
+                bottom: mobile ? 12 : 20
+            }
+        },
+        pointRadius: mobile ? 2 : 4,
+        pointIconSize: mobile ? 14 : 20
+    };
+}
+
 // Get text color based on theme
 function getTextColor() {
     return isDarkMode() ? '#f5f5f7' : '#1d1d1f';
@@ -40,18 +73,21 @@ function getGridColor() {
 
 // Custom point renderer for food icons
 function createFoodIcon(icon, size = 20) {
+    // Use smaller icons on mobile
+    const actualSize = isMobile() ? Math.min(size, 14) : size;
+    
     const canvas = document.createElement('canvas');
     const ctx = canvas.getContext('2d');
-    canvas.width = size;
-    canvas.height = size;
+    canvas.width = actualSize;
+    canvas.height = actualSize;
     
     // Set font for emoji
-    ctx.font = `${size - 4}px Arial`;
+    ctx.font = `${actualSize - 4}px Arial`;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     
     // Draw the emoji icon
-    ctx.fillText(icon, size / 2, size / 2);
+    ctx.fillText(icon, actualSize / 2, actualSize / 2);
     
     return canvas;
 }
@@ -163,35 +199,59 @@ function renderWeightChart() {
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
+                interaction: {
+                    mode: isMobile() ? 'nearest' : 'index',
+                    axis: 'x',
+                    intersect: isMobile()
+                },
+                onHover: (event, activeElements) => {
+                    if (isMobile()) {
+                        event.native.target.style.cursor = activeElements.length > 0 ? 'pointer' : 'default';
+                    }
+                },
+                onClick: (event, activeElements) => {
+                    if (isMobile() && activeElements.length > 0) {
+                        // Show tooltip on tap instead of hover
+                        const chart = event.chart;
+                        chart.tooltip.setActiveElements(activeElements);
+                        chart.update();
+                    }
+                },
                 plugins: {
                     title: {
                         display: true,
                         text: 'Weight Progress Over Time',
                         font: {
-                            size: 20,
+                            size: getResponsiveConfig().title.font.size,
                             weight: '600',
                             family: '-apple-system, BlinkMacSystemFont, sans-serif'
                         },
-                        color: getTextColor()
+                        color: getTextColor(),
+                        padding: getResponsiveConfig().title.padding
                     },
                     legend: {
                         display: true,
-                        position: 'top',
+                        position: getResponsiveConfig().legend.position,
+                        maxHeight: getResponsiveConfig().legend.maxHeight,
                         labels: {
                             usePointStyle: true,
                             color: getTextColor(),
                             font: {
                                 family: '-apple-system, BlinkMacSystemFont, sans-serif',
-                                size: 13
+                                size: getResponsiveConfig().legend.labels.font.size
                             },
+                            boxWidth: getResponsiveConfig().legend.labels.boxWidth,
+                            padding: getResponsiveConfig().legend.labels.padding,
                             generateLabels: function(chart) {
                                 const original = Chart.defaults.plugins.legend.labels.generateLabels;
                                 const labels = original.call(this, chart);
                                 
-                                // Add food icons to legend
+                                // Add food icons to legend (skip on mobile to save space)
                                 labels.forEach((label, index) => {
                                     if (chart.data.datasets[index] && chart.data.datasets[index].pointIcon) {
-                                        label.text = `${chart.data.datasets[index].pointIcon} ${label.text}`;
+                                        if (!isMobile()) {
+                                            label.text = `${chart.data.datasets[index].pointIcon} ${label.text}`;
+                                        }
                                     }
                                 });
                                 
@@ -200,7 +260,7 @@ function renderWeightChart() {
                         }
                     },
                     tooltip: {
-                        mode: 'index',
+                        mode: isMobile() ? 'nearest' : 'index',
                         intersect: false,
                         callbacks: {
                             title: function(tooltipItems) {
@@ -218,11 +278,11 @@ function renderWeightChart() {
                         time: {
                             unit: 'day',
                             displayFormats: {
-                                day: 'MMM dd'
+                                day: isMobile() ? 'M/d' : 'MMM dd'
                             }
                         },
                         title: {
-                            display: true,
+                            display: !isMobile(),
                             text: 'Date',
                             color: getTextColor(),
                             font: {
@@ -232,7 +292,14 @@ function renderWeightChart() {
                             }
                         },
                         ticks: {
-                            color: getTextColor()
+                            color: getTextColor(),
+                            maxRotation: isMobile() ? 45 : 0,
+                            minRotation: isMobile() ? 45 : 0,
+                            font: {
+                                size: isMobile() ? 10 : 12
+                            },
+                            autoSkip: true,
+                            maxTicksLimit: isMobile() ? 8 : 15
                         },
                         grid: {
                             color: getGridColor()
@@ -240,7 +307,7 @@ function renderWeightChart() {
                     },
                     y: {
                         title: {
-                            display: true,
+                            display: !isMobile(),
                             text: 'Weight (lbs)',
                             color: getTextColor(),
                             font: {
@@ -250,18 +317,16 @@ function renderWeightChart() {
                             }
                         },
                         ticks: {
-                            color: getTextColor()
+                            color: getTextColor(),
+                            font: {
+                                size: isMobile() ? 10 : 12
+                            }
                         },
                         grid: {
                             color: getGridColor()
                         },
                         beginAtZero: false
                     }
-                },
-                interaction: {
-                    mode: 'nearest',
-                    axis: 'x',
-                    intersect: false
                 }
             }
         });
@@ -308,6 +373,23 @@ function renderPercentageChart() {
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
+                interaction: {
+                    mode: isMobile() ? 'nearest' : 'index',
+                    axis: 'x',
+                    intersect: isMobile()
+                },
+                onHover: (event, activeElements) => {
+                    if (isMobile()) {
+                        event.native.target.style.cursor = activeElements.length > 0 ? 'pointer' : 'default';
+                    }
+                },
+                onClick: (event, activeElements) => {
+                    if (isMobile() && activeElements.length > 0) {
+                        const chart = event.chart;
+                        chart.tooltip.setActiveElements(activeElements);
+                        chart.update();
+                    }
+                },
                 plugins: {
                     title: {
                         display: true,
@@ -315,32 +397,34 @@ function renderPercentageChart() {
                         color: getTextColor(),
                         font: {
                             family: '-apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif',
-                            size: 20,
+                            size: getResponsiveConfig().title.font.size,
                             weight: '600'
                         },
-                        padding: {
-                            top: 10,
-                            bottom: 20
-                        }
+                        padding: getResponsiveConfig().title.padding
                     },
                     legend: {
                         display: true,
-                        position: 'top',
+                        position: getResponsiveConfig().legend.position,
+                        maxHeight: getResponsiveConfig().legend.maxHeight,
                         labels: {
                             usePointStyle: true,
                             color: getTextColor(),
                             font: {
                                 family: '-apple-system, BlinkMacSystemFont, sans-serif',
-                                size: 13
+                                size: getResponsiveConfig().legend.labels.font.size
                             },
+                            boxWidth: getResponsiveConfig().legend.labels.boxWidth,
+                            padding: getResponsiveConfig().legend.labels.padding,
                             generateLabels: function(chart) {
                                 const original = Chart.defaults.plugins.legend.labels.generateLabels;
                                 const labels = original.call(this, chart);
                                 
-                                // Add food icons to legend
+                                // Add food icons to legend (skip on mobile to save space)
                                 labels.forEach((label, index) => {
                                     if (chart.data.datasets[index] && chart.data.datasets[index].pointIcon) {
-                                        label.text = `${chart.data.datasets[index].pointIcon} ${label.text}`;
+                                        if (!isMobile()) {
+                                            label.text = `${chart.data.datasets[index].pointIcon} ${label.text}`;
+                                        }
                                     }
                                 });
                                 
@@ -349,7 +433,7 @@ function renderPercentageChart() {
                         }
                     },
                     tooltip: {
-                        mode: 'index',
+                        mode: isMobile() ? 'nearest' : 'index',
                         intersect: false,
                         callbacks: {
                             title: function(tooltipItems) {
@@ -369,11 +453,11 @@ function renderPercentageChart() {
                         time: {
                             unit: 'day',
                             displayFormats: {
-                                day: 'MMM dd'
+                                day: isMobile() ? 'M/d' : 'MMM dd'
                             }
                         },
                         title: {
-                            display: true,
+                            display: !isMobile(),
                             text: 'Date',
                             color: getTextColor(),
                             font: {
@@ -383,7 +467,14 @@ function renderPercentageChart() {
                             }
                         },
                         ticks: {
-                            color: getTextColor()
+                            color: getTextColor(),
+                            maxRotation: isMobile() ? 45 : 0,
+                            minRotation: isMobile() ? 45 : 0,
+                            font: {
+                                size: isMobile() ? 10 : 12
+                            },
+                            autoSkip: true,
+                            maxTicksLimit: isMobile() ? 8 : 15
                         },
                         grid: {
                             color: getGridColor()
@@ -391,8 +482,8 @@ function renderPercentageChart() {
                     },
                     y: {
                         title: {
-                            display: true,
-                            text: 'Weight Loss Percentage (%)',
+                            display: !isMobile(),
+                            text: 'Weight Loss %',
                             color: getTextColor(),
                             font: {
                                 family: '-apple-system, BlinkMacSystemFont, sans-serif',
@@ -402,6 +493,9 @@ function renderPercentageChart() {
                         },
                         ticks: {
                             color: getTextColor(),
+                            font: {
+                                size: isMobile() ? 10 : 12
+                            },
                             callback: function(value) {
                                 return value + '%';
                             }
@@ -410,11 +504,6 @@ function renderPercentageChart() {
                             color: getGridColor()
                         }
                     }
-                },
-                interaction: {
-                    mode: 'nearest',
-                    axis: 'x',
-                    intersect: false
                 }
             }
         });
@@ -459,6 +548,7 @@ function createWeightDatasets() {
             // Sort data by date
             const sortedData = competitorDataMap[competitor].sort((a, b) => a.x - b.x);
             
+            const responsiveConfig = getResponsiveConfig();
             datasets.push({
                 label: competitor,
                 data: sortedData,
@@ -468,10 +558,10 @@ function createWeightDatasets() {
                 fill: false,
                 pointRadius: 0, // Hide default points
                 pointHoverRadius: 0,
-                borderWidth: 2,
+                borderWidth: isMobile() ? 1.5 : 2,
                 // Custom properties for food icons
                 pointIcon: foodIcons[colorIndex % foodIcons.length],
-                pointIconSize: 20
+                pointIconSize: responsiveConfig.pointIconSize
             });
         }
         colorIndex++;
@@ -522,6 +612,7 @@ function createPercentageDatasets() {
                 y: ((startWeight - entry.weight) / startWeight) * 100
             }));
             
+            const responsiveConfig = getResponsiveConfig();
             datasets.push({
                 label: competitor,
                 data: percentageData,
@@ -531,10 +622,10 @@ function createPercentageDatasets() {
                 fill: false,
                 pointRadius: 0, // Hide default points  
                 pointHoverRadius: 0,
-                borderWidth: 2,
+                borderWidth: isMobile() ? 1.5 : 2,
                 // Custom properties for food icons
                 pointIcon: foodIcons[colorIndex % foodIcons.length],
-                pointIconSize: 20
+                pointIconSize: responsiveConfig.pointIconSize
             });
         }
         colorIndex++;
@@ -621,6 +712,7 @@ function createRateDatasets() {
             }
             
             if (rateData.length > 0) {
+                const responsiveConfig = getResponsiveConfig();
                 datasets.push({
                     label: competitor,
                     data: rateData,
@@ -628,9 +720,9 @@ function createRateDatasets() {
                     backgroundColor: colorPalette[colorIndex % colorPalette.length] + '20',
                     tension: 0.3,
                     fill: false,
-                    pointRadius: 5,
-                    pointHoverRadius: 7,
-                    borderWidth: 2
+                    pointRadius: responsiveConfig.pointRadius,
+                    pointHoverRadius: isMobile() ? 4 : 7,
+                    borderWidth: isMobile() ? 1.5 : 2
                 });
             }
         }
@@ -675,6 +767,22 @@ function renderRateChart() {
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
+                interaction: {
+                    mode: isMobile() ? 'nearest' : 'index',
+                    intersect: isMobile()
+                },
+                onHover: (event, activeElements) => {
+                    if (isMobile()) {
+                        event.native.target.style.cursor = activeElements.length > 0 ? 'pointer' : 'default';
+                    }
+                },
+                onClick: (event, activeElements) => {
+                    if (isMobile() && activeElements.length > 0) {
+                        const chart = event.chart;
+                        chart.tooltip.setActiveElements(activeElements);
+                        chart.update();
+                    }
+                },
                 plugins: {
                     title: {
                         display: true,
@@ -682,28 +790,28 @@ function renderRateChart() {
                         color: getTextColor(),
                         font: {
                             family: '-apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif',
-                            size: 20,
+                            size: getResponsiveConfig().title.font.size,
                             weight: '600'
                         },
-                        padding: {
-                            top: 10,
-                            bottom: 20
-                        }
+                        padding: getResponsiveConfig().title.padding
                     },
                     legend: {
                         display: true,
-                        position: 'top',
+                        position: getResponsiveConfig().legend.position,
+                        maxHeight: getResponsiveConfig().legend.maxHeight,
                         labels: {
                             usePointStyle: true,
                             color: getTextColor(),
                             font: {
                                 family: '-apple-system, BlinkMacSystemFont, sans-serif',
-                                size: 13
-                            }
+                                size: getResponsiveConfig().legend.labels.font.size
+                            },
+                            boxWidth: getResponsiveConfig().legend.labels.boxWidth,
+                            padding: getResponsiveConfig().legend.labels.padding
                         }
                     },
                     tooltip: {
-                        mode: 'index',
+                        mode: isMobile() ? 'nearest' : 'index',
                         intersect: false,
                         callbacks: {
                             title: function(tooltipItems) {
@@ -722,10 +830,12 @@ function renderRateChart() {
                         type: 'time',
                         time: {
                             unit: 'day',
-                            displayFormats: { day: 'MMM dd' }
+                            displayFormats: { 
+                                day: isMobile() ? 'M/d' : 'MMM dd' 
+                            }
                         },
                         title: {
-                            display: true,
+                            display: !isMobile(),
                             text: 'Date',
                             color: getTextColor(),
                             font: {
@@ -735,7 +845,14 @@ function renderRateChart() {
                             }
                         },
                         ticks: {
-                            color: getTextColor()
+                            color: getTextColor(),
+                            maxRotation: isMobile() ? 45 : 0,
+                            minRotation: isMobile() ? 45 : 0,
+                            font: {
+                                size: isMobile() ? 10 : 12
+                            },
+                            autoSkip: true,
+                            maxTicksLimit: isMobile() ? 8 : 15
                         },
                         grid: {
                             color: getGridColor()
@@ -743,8 +860,8 @@ function renderRateChart() {
                     },
                     y: {
                         title: {
-                            display: true,
-                            text: 'Weight Loss Rate (lbs/week)',
+                            display: !isMobile(),
+                            text: isMobile() ? 'lbs/wk' : 'Weight Loss Rate (lbs/week)',
                             color: getTextColor(),
                             font: {
                                 family: '-apple-system, BlinkMacSystemFont, sans-serif',
@@ -754,8 +871,11 @@ function renderRateChart() {
                         },
                         ticks: {
                             color: getTextColor(),
+                            font: {
+                                size: isMobile() ? 10 : 12
+                            },
                             callback: function(value) {
-                                return value.toFixed(1) + ' lbs/wk';
+                                return isMobile() ? value.toFixed(1) : value.toFixed(1) + ' lbs/wk';
                             }
                         },
                         grid: {
@@ -836,6 +956,7 @@ function createLeaderboardDatasets() {
     const datasets = [];
     let colorIndex = 0;
     
+    const responsiveConfig = getResponsiveConfig();
     competitors.forEach(competitor => {
         if (competitorProgress[competitor].length > 0) {
             datasets.push({
@@ -845,9 +966,9 @@ function createLeaderboardDatasets() {
                 backgroundColor: colorPalette[colorIndex % colorPalette.length] + '40',
                 tension: 0.2,
                 fill: false,
-                pointRadius: 6,
-                pointHoverRadius: 8,
-                borderWidth: 3
+                pointRadius: isMobile() ? 3 : 6,
+                pointHoverRadius: isMobile() ? 5 : 8,
+                borderWidth: isMobile() ? 2 : 3
             });
         }
         colorIndex++;
@@ -891,35 +1012,51 @@ function renderLeaderboardChart() {
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
+                interaction: {
+                    mode: isMobile() ? 'nearest' : 'index',
+                    intersect: isMobile()
+                },
+                onHover: (event, activeElements) => {
+                    if (isMobile()) {
+                        event.native.target.style.cursor = activeElements.length > 0 ? 'pointer' : 'default';
+                    }
+                },
+                onClick: (event, activeElements) => {
+                    if (isMobile() && activeElements.length > 0) {
+                        const chart = event.chart;
+                        chart.tooltip.setActiveElements(activeElements);
+                        chart.update();
+                    }
+                },
                 plugins: {
                     title: {
                         display: true,
-                        text: 'Weekly Leaderboard Evolution',
+                        text: isMobile() ? 'Leaderboard Evolution' : 'Weekly Leaderboard Evolution',
                         color: getTextColor(),
                         font: {
                             family: '-apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif',
-                            size: 20,
+                            size: getResponsiveConfig().title.font.size,
                             weight: '600'
                         },
-                        padding: {
-                            top: 10,
-                            bottom: 20
-                        }
+                        padding: getResponsiveConfig().title.padding
                     },
                     legend: {
                         display: true,
-                        position: 'top',
+                        position: getResponsiveConfig().legend.position,
+                        maxHeight: getResponsiveConfig().legend.maxHeight,
                         labels: {
                             usePointStyle: true,
                             color: getTextColor(),
                             font: {
                                 family: '-apple-system, BlinkMacSystemFont, sans-serif',
-                                size: 13
-                            }
+                                size: getResponsiveConfig().legend.labels.font.size
+                            },
+                            boxWidth: getResponsiveConfig().legend.labels.boxWidth,
+                            padding: getResponsiveConfig().legend.labels.padding
                         }
                     },
                     tooltip: {
-                        mode: 'index',
+                        mode: isMobile() ? 'nearest' : 'index',
                         intersect: false,
                         callbacks: {
                             title: function(tooltipItems) {
@@ -938,10 +1075,12 @@ function renderLeaderboardChart() {
                         type: 'time',
                         time: {
                             unit: 'day',
-                            displayFormats: { day: 'MMM dd' }
+                            displayFormats: { 
+                                day: isMobile() ? 'M/d' : 'MMM dd' 
+                            }
                         },
                         title: {
-                            display: true,
+                            display: !isMobile(),
                             text: 'Date',
                             color: getTextColor(),
                             font: {
@@ -951,7 +1090,14 @@ function renderLeaderboardChart() {
                             }
                         },
                         ticks: {
-                            color: getTextColor()
+                            color: getTextColor(),
+                            maxRotation: isMobile() ? 45 : 0,
+                            minRotation: isMobile() ? 45 : 0,
+                            font: {
+                                size: isMobile() ? 10 : 12
+                            },
+                            autoSkip: true,
+                            maxTicksLimit: isMobile() ? 8 : 15
                         },
                         grid: {
                             color: getGridColor()
@@ -960,8 +1106,8 @@ function renderLeaderboardChart() {
                     y: {
                         reverse: true, // Lower rank number = higher on chart
                         title: {
-                            display: true,
-                            text: 'Leaderboard Position',
+                            display: !isMobile(),
+                            text: 'Position',
                             color: getTextColor(),
                             font: {
                                 family: '-apple-system, BlinkMacSystemFont, sans-serif',
@@ -972,9 +1118,12 @@ function renderLeaderboardChart() {
                         ticks: {
                             color: getTextColor(),
                             stepSize: 1,
+                            font: {
+                                size: isMobile() ? 10 : 12
+                            },
                             callback: function(value) {
                                 const medal = value === 1 ? '🥇' : value === 2 ? '🥈' : value === 3 ? '🥉' : '';
-                                return `#${value} ${medal}`;
+                                return isMobile() ? `#${value}` : `#${value} ${medal}`;
                             }
                         },
                         grid: {
@@ -995,3 +1144,13 @@ window.PKWLC = window.PKWLC || {};
 window.PKWLC.renderCharts = renderCharts;
 window.PKWLC.updateCharts = updateCharts;
 window.PKWLC.renderChartsInternal = renderChartsInternal;
+
+// Re-render charts on window resize for responsive changes
+let resizeTimeout;
+window.addEventListener('resize', () => {
+    clearTimeout(resizeTimeout);
+    resizeTimeout = setTimeout(() => {
+        console.log('Window resized, re-rendering charts...');
+        renderChartsInternal();
+    }, 250);
+});

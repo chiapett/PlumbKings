@@ -790,3 +790,25 @@ window.PKWLC = {
     weightData,
     competitors
 };
+
+// Add pull-to-refresh capability on mobile
+if ('ontouchstart' in window) {
+    let touchStartY = 0;
+    let touchEndY = 0;
+    
+    document.addEventListener('touchstart', (e) => {
+        touchStartY = e.touches[0].clientY;
+    }, { passive: true });
+    
+    document.addEventListener('touchend', (e) => {
+        touchEndY = e.changedTouches[0].clientY;
+        
+        // If user pulled down from top (and is at top of page)
+        if (touchStartY < 100 && touchEndY - touchStartY > 100 && window.scrollY === 0) {
+            showMessage('Refreshing data...', 'success');
+            setTimeout(() => {
+                loadWeightData();
+            }, 300);
+        }
+    }, { passive: true });
+}
