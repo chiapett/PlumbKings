@@ -115,10 +115,39 @@ function filterDataBySeason(data) {
     const startDate = seasonConfig.startDate;
     const endDate = seasonConfig.endDate;
     
-    return data.filter(entry => {
+    // Filter entries within the season date range
+    const seasonData = data.filter(entry => {
         const entryDate = entry.date instanceof Date ? entry.date : new Date(entry.date);
         return entryDate >= startDate && entryDate <= endDate;
     });
+    
+    // For Season 2+, add virtual carryover entries at the start of the season
+    if (currentSeason > 1) {
+        const carryoverWeights = getSeasonCarryoverWeights(currentSeason);
+        const carryoverEntries = [];
+        
+        competitors.forEach(competitor => {
+            if (carryoverWeights[competitor]) {
+                // Add a virtual entry at the start of the season with carryover weight
+                carryoverEntries.push({
+                    id: `carryover-${competitor}`,
+                    name: competitor,
+                    date: new Date(startDate),
+                    weight: carryoverWeights[competitor],
+                    isCarryover: true
+                });
+            }
+        });
+        
+        // Combine carryover entries with actual season data
+        return [...carryoverEntries, ...seasonData].sort((a, b) => {
+            const dateA = a.date instanceof Date ? a.date : new Date(a.date);
+            const dateB = b.date instanceof Date ? b.date : new Date(b.date);
+            return dateA - dateB;
+        });
+    }
+    
+    return seasonData;
 }
 
 // Get the last weight from previous season for each competitor
@@ -165,6 +194,14 @@ function switchSeason(seasonId) {
     
     // Filter data and re-render everything
     weightData = filterDataBySeason(allWeightData);
+    
+    // CRITICAL: Update the global data that charts use
+    window.PKWLC = window.PKWLC || {};
+    window.PKWLC.weightData = weightData;
+    window.PKWLC.allWeightData = allWeightData;
+    window.PKWLC.competitors = competitors;
+    
+    console.log(`Switched to Season ${seasonId}: ${weightData.length} entries visible`);
     
     // Update UI
     updateSeasonUI();
