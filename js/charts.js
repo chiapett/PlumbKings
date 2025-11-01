@@ -204,6 +204,19 @@ function renderWeightChart() {
                     axis: 'x',
                     intersect: isMobile()
                 },
+                onHover: (event, activeElements) => {
+                    if (isMobile()) {
+                        event.native.target.style.cursor = activeElements.length > 0 ? 'pointer' : 'default';
+                    }
+                },
+                onClick: (event, activeElements) => {
+                    if (isMobile() && activeElements.length > 0) {
+                        // Show tooltip on tap instead of hover
+                        const chart = event.chart;
+                        chart.tooltip.setActiveElements(activeElements);
+                        chart.update();
+                    }
+                },
                 plugins: {
                     title: {
                         display: true,
@@ -364,6 +377,18 @@ function renderPercentageChart() {
                     mode: isMobile() ? 'nearest' : 'index',
                     axis: 'x',
                     intersect: isMobile()
+                },
+                onHover: (event, activeElements) => {
+                    if (isMobile()) {
+                        event.native.target.style.cursor = activeElements.length > 0 ? 'pointer' : 'default';
+                    }
+                },
+                onClick: (event, activeElements) => {
+                    if (isMobile() && activeElements.length > 0) {
+                        const chart = event.chart;
+                        chart.tooltip.setActiveElements(activeElements);
+                        chart.update();
+                    }
                 },
                 plugins: {
                     title: {
@@ -746,6 +771,18 @@ function renderRateChart() {
                     mode: isMobile() ? 'nearest' : 'index',
                     intersect: isMobile()
                 },
+                onHover: (event, activeElements) => {
+                    if (isMobile()) {
+                        event.native.target.style.cursor = activeElements.length > 0 ? 'pointer' : 'default';
+                    }
+                },
+                onClick: (event, activeElements) => {
+                    if (isMobile() && activeElements.length > 0) {
+                        const chart = event.chart;
+                        chart.tooltip.setActiveElements(activeElements);
+                        chart.update();
+                    }
+                },
                 plugins: {
                     title: {
                         display: true,
@@ -978,6 +1015,18 @@ function renderLeaderboardChart() {
                 interaction: {
                     mode: isMobile() ? 'nearest' : 'index',
                     intersect: isMobile()
+                },
+                onHover: (event, activeElements) => {
+                    if (isMobile()) {
+                        event.native.target.style.cursor = activeElements.length > 0 ? 'pointer' : 'default';
+                    }
+                },
+                onClick: (event, activeElements) => {
+                    if (isMobile() && activeElements.length > 0) {
+                        const chart = event.chart;
+                        chart.tooltip.setActiveElements(activeElements);
+                        chart.update();
+                    }
                 },
                 plugins: {
                     title: {

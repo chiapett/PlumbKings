@@ -524,10 +524,28 @@ button[type="submit"]:active {
    ============================================ */
 
 .loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
     text-align: center;
     padding: 48px;
     color: var(--text-secondary);
     font-size: 17px;
+}
+
+.loading::after {
+    content: '';
+    width: 40px;
+    height: 40px;
+    border: 3px solid var(--border-color);
+    border-top-color: var(--accent-blue);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
 }
 
 /* ============================================
@@ -802,6 +820,17 @@ footer p {
         margin-bottom: 24px;
     }
     
+    section h2 {
+        font-size: 24px;
+        padding-bottom: 12px;
+        margin-bottom: 20px;
+    }
+    
+    .section-subtitle {
+        font-size: 14px;
+        margin-bottom: 20px;
+    }
+    
     .challenge-stats {
         grid-template-columns: 1fr;
     }
@@ -835,18 +864,105 @@ footer p {
         margin-bottom: 16px;
     }
     
-    .modal-content {
-        width: 95%;
-        margin: 16px;
+    /* Make leaderboard scrollable on mobile */
+    #leaderboardTable {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
     }
     
     .leaderboard-table {
-        font-size: 14px;
+        font-size: 13px;
+        min-width: 600px;
     }
     
     .leaderboard-table th,
     .leaderboard-table td {
-        padding: 12px 8px;
+        padding: 10px 6px;
+        white-space: nowrap;
+    }
+    
+    /* Make rank column more compact */
+    .rank {
+        font-size: 20px;
+        width: 40px;
+    }
+    
+    /* Larger touch targets for form inputs */
+    .form-group input,
+    .form-group select {
+        padding: 14px 16px;
+        font-size: 16px; /* Prevent iOS zoom on focus */
+        min-height: 48px;
+    }
+    
+    button[type="submit"] {
+        padding: 16px 24px;
+        font-size: 18px;
+        min-height: 56px;
+    }
+    
+    /* Optimize modal for mobile */
+    .modal-content {
+        width: 95%;
+        max-width: none;
+        margin: 20px 10px;
+        max-height: 85vh;
+        overflow-y: auto;
+    }
+    
+    .modal-header {
+        padding: 20px 16px;
+    }
+    
+    .modal-header h2 {
+        font-size: 20px;
+        padding-right: 40px; /* Space for close button */
+    }
+    
+    .modal-body {
+        padding: 20px 16px;
+    }
+    
+    .amanda-brutal-message {
+        padding: 16px;
+    }
+    
+    .brutal-quote {
+        font-size: 15px;
+        line-height: 1.5;
+    }
+    
+    /* Optimize header content for mobile */
+    .challenge-info {
+        padding: 20px 16px;
+    }
+    
+    .challenge-info p {
+        font-size: 14px;
+        margin: 10px 0;
+        line-height: 1.5;
+    }
+    
+    .hero-image img {
+        max-width: 150px !important;
+    }
+}
+
+/* Extra small screens - hide less critical columns */
+@media (max-width: 480px) {
+    .leaderboard-table th:nth-child(3),
+    .leaderboard-table td:nth-child(3) {
+        display: none; /* Hide "Start Weight" column */
+    }
+    
+    .leaderboard-table th:last-child,
+    .leaderboard-table td:last-child {
+        display: none; /* Hide "Entries" column */
+    }
+    
+    .leaderboard-table {
+        min-width: auto;
+        font-size: 12px;
     }
 }
 
