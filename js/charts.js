@@ -343,6 +343,10 @@ function renderPercentageChart() {
             return;
         }
         
+        // Hide loading indicator
+        const loading = document.getElementById('percentageChartLoading');
+        if (loading) loading.style.display = 'none';
+        
         const ctx = canvas.getContext('2d');
         
         // Destroy existing chart if it exists
