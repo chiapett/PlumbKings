@@ -27,10 +27,25 @@
                 <img src="image000000.png.jpeg" alt="PlumbKings Challenge" style="max-width: 200px; border-radius: 15px; margin: 15px 0; box-shadow: 0 5px 15px rgba(0,0,0,0.3);">
             </div>
             <div class="challenge-info">
-                <p><strong>📅 Fat-to-Fit Journey:</strong> August 4, 2025 - November 4, 2025</p>
+                <p><strong>📅 Fat-to-Fit Journey:</strong> <span id="season-dates">August 4, 2025 - November 4, 2025</span></p>
                 <p><strong>🎯 Mission:</strong> Transform from Dad Bod to Rad Bod!</p>
                 <p><strong>💪 Goal:</strong> Less belly, more jelly (the good kind)!</p>
                 <p><strong>🏆 Prize:</strong> Bragging rights & a new belt (smaller size)!</p>
+            </div>
+            
+            <!-- Season Selector -->
+            <div class="season-selector">
+                <label class="season-toggle-label">View Season:</label>
+                <div class="season-toggle-group">
+                    <button class="season-toggle-btn" data-season="1">
+                        🍂 Season 1<br>
+                        <span class="season-dates">Aug - Nov 2025</span>
+                    </button>
+                    <button class="season-toggle-btn active" data-season="2">
+                        ❄️ Season 2<br>
+                        <span class="season-dates">Nov 2025 - Jan 2026</span>
+                    </button>
+                </div>
             </div>
         </header>
 

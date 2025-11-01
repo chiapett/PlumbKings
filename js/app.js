@@ -1,18 +1,54 @@
 // Application state
 let competitors = ['Ben', 'Brien', 'Carl', 'Keith', 'Rich', 'Ryan', 'Stephen', 'Spencer', 'Tristan'];
 let weightData = [];
+let allWeightData = []; // Store all data across all seasons
 let charts = {};
 
-// Challenge configuration
-const challengeConfig = {
-    startDate: new Date('2025-08-04'), // Today
-    endDate: new Date('2025-11-04'),   // 3 months from now
-    milestones: [
-        { name: 'Month 1', date: new Date('2025-09-04'), description: 'First Month Challenge' },
-        { name: 'Month 2', date: new Date('2025-10-04'), description: 'Second Month Challenge' },
-        { name: 'Month 3', date: new Date('2025-11-04'), description: 'Final Challenge' }
-    ]
-};
+// Auto-detect current season based on today's date
+function detectCurrentSeason() {
+    const today = new Date();
+    // After Nov 4th 2025, default to Season 2
+    if (today >= new Date('2025-11-04')) {
+        return 2;
+    }
+    return 1;
+}
+
+let currentSeason = detectCurrentSeason();
+
+// Season configurations
+const seasons = [
+    {
+        id: 1,
+        name: 'Season 1',
+        startDate: new Date('2025-08-04'),
+        endDate: new Date('2025-11-04'),
+        milestones: [
+            { name: 'Month 1', date: new Date('2025-09-04'), description: 'First Month Challenge' },
+            { name: 'Month 2', date: new Date('2025-10-04'), description: 'Second Month Challenge' },
+            { name: 'Month 3', date: new Date('2025-11-04'), description: 'Final Challenge' }
+        ]
+    },
+    {
+        id: 2,
+        name: 'Season 2',
+        startDate: new Date('2025-11-01'),
+        endDate: new Date('2026-01-31'),
+        milestones: [
+            { name: 'Month 1', date: new Date('2025-12-01'), description: 'First Month Challenge' },
+            { name: 'Month 2', date: new Date('2026-01-01'), description: 'Second Month Challenge' },
+            { name: 'Month 3', date: new Date('2026-01-31'), description: 'Final Challenge' }
+        ]
+    }
+];
+
+// Get current season config
+function getCurrentSeasonConfig() {
+    return seasons.find(s => s.id === currentSeason) || seasons[1];
+}
+
+// Challenge configuration (will be dynamic based on season)
+let challengeConfig = getCurrentSeasonConfig();
 
 // DOM elements
 const competitorSelect = document.getElementById('competitor');
@@ -54,27 +90,169 @@ async function initializeApp() {
         // Setup form handler
         setupFormHandler();
         
+        // Setup season toggles
+        setupSeasonToggles();
+        
+        // Update UI with current season
+        updateSeasonUI();
+        
         // Initial render
         renderChallengeTimeline();
         renderLeaderboard();
         renderCharts();
         
         console.log('✅ PKWLC Dashboard initialized successfully');
+        console.log(`📅 Current season: ${currentSeason} (${getCurrentSeasonConfig().name})`);
     } catch (error) {
         console.error('❌ Error initializing app:', error);
         showMessage('Error initializing dashboard. Check console for details.', 'error');
     }
 }
 
+// Filter weight data by current season
+function filterDataBySeason(data) {
+    const seasonConfig = getCurrentSeasonConfig();
+    const startDate = seasonConfig.startDate;
+    const endDate = seasonConfig.endDate;
+    
+    // Filter entries within the season date range
+    const seasonData = data.filter(entry => {
+        const entryDate = entry.date instanceof Date ? entry.date : new Date(entry.date);
+        return entryDate >= startDate && entryDate <= endDate;
+    });
+    
+    // For Season 2+, add virtual carryover entries at the start of the season
+    if (currentSeason > 1) {
+        const carryoverWeights = getSeasonCarryoverWeights(currentSeason);
+        const carryoverEntries = [];
+        
+        competitors.forEach(competitor => {
+            if (carryoverWeights[competitor]) {
+                // Add a virtual entry at the start of the season with carryover weight
+                carryoverEntries.push({
+                    id: `carryover-${competitor}`,
+                    name: competitor,
+                    date: new Date(startDate),
+                    weight: carryoverWeights[competitor],
+                    isCarryover: true
+                });
+            }
+        });
+        
+        // Combine carryover entries with actual season data
+        return [...carryoverEntries, ...seasonData].sort((a, b) => {
+            const dateA = a.date instanceof Date ? a.date : new Date(a.date);
+            const dateB = b.date instanceof Date ? b.date : new Date(b.date);
+            return dateA - dateB;
+        });
+    }
+    
+    return seasonData;
+}
+
+// Get the last weight from previous season for each competitor
+function getSeasonCarryoverWeights(seasonId) {
+    if (seasonId === 1) return {}; // Season 1 has no carryover
+    
+    const previousSeason = seasons.find(s => s.id === seasonId - 1);
+    if (!previousSeason) return {};
+    
+    const carryoverWeights = {};
+    
+    competitors.forEach(competitor => {
+        // Get all entries from previous season
+        const previousSeasonData = allWeightData.filter(entry => {
+            const entryDate = entry.date instanceof Date ? entry.date : new Date(entry.date);
+            return (entry.name === competitor || entry.competitor === competitor) &&
+                   entryDate >= previousSeason.startDate && 
+                   entryDate <= previousSeason.endDate;
+        });
+        
+        // Sort by date and get the last entry
+        if (previousSeasonData.length > 0) {
+            previousSeasonData.sort((a, b) => {
+                const dateA = a.date instanceof Date ? a.date : new Date(a.date);
+                const dateB = b.date instanceof Date ? b.date : new Date(b.date);
+                return dateB - dateA;
+            });
+            carryoverWeights[competitor] = previousSeasonData[0].weight;
+        }
+    });
+    
+    return carryoverWeights;
+}
+
+// Switch season
+function switchSeason(seasonId) {
+    currentSeason = seasonId;
+    challengeConfig = getCurrentSeasonConfig();
+    
+    // Update active button state
+    document.querySelectorAll('.season-toggle-btn').forEach(btn => {
+        btn.classList.toggle('active', parseInt(btn.dataset.season) === seasonId);
+    });
+    
+    // Filter data and re-render everything
+    weightData = filterDataBySeason(allWeightData);
+    
+    // CRITICAL: Update the global data that charts use
+    window.PKWLC = window.PKWLC || {};
+    window.PKWLC.weightData = weightData;
+    window.PKWLC.allWeightData = allWeightData;
+    window.PKWLC.competitors = competitors;
+    
+    console.log(`Switched to Season ${seasonId}: ${weightData.length} entries visible`);
+    
+    // Update UI
+    updateSeasonUI();
+    
+    // Re-render all views
+    renderChallengeTimeline();
+    renderLeaderboard();
+    renderCharts();
+    
+    // Show message
+    showMessage(`Switched to ${challengeConfig.name}`, 'success');
+}
+
+// Update header and UI with current season info
+function updateSeasonUI() {
+    const seasonConfig = getCurrentSeasonConfig();
+    
+    // Update season dates in header
+    const seasonDatesSpan = document.getElementById('season-dates');
+    if (seasonDatesSpan) {
+        const startStr = seasonConfig.startDate.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+        const endStr = seasonConfig.endDate.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+        seasonDatesSpan.textContent = `${startStr} - ${endStr}`;
+    }
+}
+
+// Setup season toggle listeners
+function setupSeasonToggles() {
+    document.querySelectorAll('.season-toggle-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const seasonId = parseInt(btn.dataset.season);
+            switchSeason(seasonId);
+        });
+    });
+    
+    // Set initial active state
+    document.querySelectorAll('.season-toggle-btn').forEach(btn => {
+        btn.classList.toggle('active', parseInt(btn.dataset.season) === currentSeason);
+    });
+}
+
 function getBiggestLoserForMilestone(milestoneDate) {
     // Calculate weight loss up to the milestone date
     const competitorProgress = {};
+    const carryoverWeights = getSeasonCarryoverWeights(currentSeason);
     
     // Initialize competitor data
     competitors.forEach(competitor => {
         competitorProgress[competitor] = {
             name: competitor,
-            startWeight: null,
+            startWeight: carryoverWeights[competitor] || null,
             milestoneWeight: null,
             weightLoss: 0
         };
@@ -85,7 +263,7 @@ function getBiggestLoserForMilestone(milestoneDate) {
         const entryDate = entry.date instanceof Date ? entry.date : new Date(entry.date);
         
         if (entryDate <= milestoneDate && competitorProgress[entry.name]) {
-            // Set start weight (first entry)
+            // Set start weight (first entry) if no carryover
             if (!competitorProgress[entry.name].startWeight) {
                 competitorProgress[entry.name].startWeight = entry.weight;
             }
@@ -273,10 +451,10 @@ async function loadWeightData() {
             .orderBy('date', 'asc')
             .get();
         
-        weightData = [];
+        allWeightData = [];
         snapshot.forEach(doc => {
             const data = doc.data();
-            weightData.push({
+            allWeightData.push({
                 id: doc.id,
                 name: data.name,
                 date: data.date.toDate(),
@@ -284,11 +462,15 @@ async function loadWeightData() {
             });
         });
         
-        console.log(`✅ Loaded ${weightData.length} weight entries`);
+        // Filter by current season
+        weightData = filterDataBySeason(allWeightData);
+        
+        console.log(`✅ Loaded ${allWeightData.length} total entries, ${weightData.length} in ${getCurrentSeasonConfig().name}`);
         
         // Store data globally for charts
         window.PKWLC = window.PKWLC || {};
         window.PKWLC.weightData = weightData;
+        window.PKWLC.allWeightData = allWeightData;
         window.PKWLC.competitors = competitors;
         
     } catch (error) {
@@ -299,13 +481,14 @@ async function loadWeightData() {
 
 function calculateLeaderboard() {
     const competitorData = {};
+    const carryoverWeights = getSeasonCarryoverWeights(currentSeason);
     
     // Initialize competitor data
     competitors.forEach(competitor => {
         competitorData[competitor] = {
             name: competitor,
             entries: [],
-            startWeight: null,
+            startWeight: carryoverWeights[competitor] || null,
             currentWeight: null,
             weightLoss: 0,
             percentageLoss: 0
@@ -325,7 +508,10 @@ function calculateLeaderboard() {
             // Sort entries by date
             competitor.entries.sort((a, b) => a.date - b.date);
             
-            competitor.startWeight = competitor.entries[0].weight;
+            // Use carryover weight if available (Season 2+), otherwise use first entry
+            if (!competitor.startWeight) {
+                competitor.startWeight = competitor.entries[0].weight;
+            }
             competitor.currentWeight = competitor.entries[competitor.entries.length - 1].weight;
             competitor.weightLoss = competitor.startWeight - competitor.currentWeight;
             competitor.percentageLoss = competitor.startWeight > 0 ? 
@@ -335,7 +521,7 @@ function calculateLeaderboard() {
     
     // Sort by weight loss (descending)
     return Object.values(competitorData)
-        .filter(competitor => competitor.entries.length > 0)
+        .filter(competitor => competitor.entries.length > 0 || competitor.startWeight !== null)
         .sort((a, b) => b.weightLoss - a.weightLoss);
 }
 
