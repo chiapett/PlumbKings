@@ -820,7 +820,19 @@ footer p {
     }
     
     .chart-wrapper {
-        height: 300px;
+        height: 350px; /* Increased from 300px for better visibility */
+    }
+    
+    /* Make chart containers more compact on mobile */
+    .chart-container {
+        padding: 16px;
+        margin-bottom: 24px;
+    }
+    
+    /* Reduce chart subtitle size */
+    .chart-subtitle {
+        font-size: 13px;
+        margin-bottom: 16px;
     }
     
     .modal-content {
